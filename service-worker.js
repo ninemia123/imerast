@@ -1,7 +1,9 @@
 const CACHE_NAME = "imerast-cache-v1";
 const urlsToCache = [
-  "/imerast/",
-  "/imerast/index.html"
+  "/imerast/index.html",
+  "/imerast/manifest.json",
+  "/imerast/assets/icon-192.png",
+  "/imerast/assets/icon-512.png"
 ];
 
 self.addEventListener("install", event => {
@@ -18,4 +20,5 @@ self.addEventListener("fetch", event => {
       return response || fetch(event.request);
     })
   );
+
 });
