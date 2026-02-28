@@ -388,6 +388,14 @@ function saveRepTransfer() { let pk = cur.getFullYear()+'-'+String(cur.getMonth(
 function exportData() { let b = new Blob([JSON.stringify({db, settings, repStorage})], {type:'application/json'}); let a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download="backup.json"; a.click(); }
 function importData(e) { let f = e.target.files[0]; let r = new FileReader(); r.onload=(x)=>{ let d = JSON.parse(x.target.result); db=d.db; settings=d.settings; repStorage=d.repStorage; localStorage.setItem('exfroura_db', JSON.stringify(db)); calculate(); }; r.readAsText(f); }
 document.addEventListener('DOMContentLoaded', () => { document.getElementById('mode-sel').value = settings.mode; calculate(); });
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('service-worker.js')
+        .then(reg => console.log('ServiceWorker registered: ', reg))
+        .catch(err => console.log('ServiceWorker registration failed: ', err));
+    });
+}
 </script>
 </body>
 </html>
