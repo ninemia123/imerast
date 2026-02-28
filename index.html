@@ -65,6 +65,8 @@
         .footer { padding: 15px; background: #fafafa; border-top: 4px solid var(--green); }
         .money-line { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 6px 0; font-size: 14px; font-weight: 900; }
         .total-net-box { background: var(--green); color: white; padding: 15px; text-align: center; font-size: 1.8em; font-weight: 900; border-radius: 8px; margin: 10px 0; }
+        
+        .custom-btn { background: #ffeb3b !important; color: #000 !important; }
     </style>
 </head>
 <body>
@@ -201,15 +203,21 @@ let repStorage = JSON.parse(localStorage.getItem('exfroura_rep') || '{"savedTran
 let selD = '', activeShift = 1;
 
 const SHIFTS = [
-    {n:'ΠΡΩΙ', h:8, t:'day'}, {n:'ΑΠΟΓΕΥΜΑ', h:8, t:'day'}, {n:'ΝΥΧΤΑ', h:8, t:'night'},
-    {n:'ΡΕΠΟ (10ο ΠΕΝΘ)', h:8, t:'repo10'}, // ΝΕΑ ΕΠΙΛΟΓΗ
+    {n:'ΠΡΩΙ', h:8, t:'day'}, {n:'ΑΠΟΓΕΥΜΑ', h:8, t:'day'}, {n:'ΝΥΧΤΑ (3.3€)', h:8, t:'night'},
+    {n:'ΡΕΠΟ (10ο ΠΕΝΘ)', h:8, t:'repo10'},
     {n:'ΑΔΙΑΘΕΤΟ', h:0, t:'pent'}, {n:'ΑΔΙΑΘΕΤΟ (ΚΥ)', h:0, t:'pent'}, {n:'ΡΕΠΟ', h:0, t:'rest'},
     {n:'ΚΑΝΟΝΙΚΗ ΑΔΕΙΑ', h:0, t:'leave'}, {n:'ΒΡΑΧΕΙΑ', h:0, t:'leave'}, 
     {n:'ΑΝΑΡΡΩΤΙΚΗ', h:0, t:'leave'}, {n:'ΕΙΔΙΚΗ ΑΔΕΙΑ', h:0, t:'leave'}
 ];
 
-function isWork(s) { return ['ΠΡΩΙ', 'ΑΠΟΓΕΥΜΑ', 'ΝΥΧΤΑ', 'ΡΕΠΟ (10ο ΠΕΝΘ)'].includes(s); }
-function isPentShift(s) { return (isWork(s) || s === 'ΑΔΙΑΘΕΤΟ' || s === 'ΑΔΙΑΘΕΤΟ (ΚΥ)') && s !== 'ΡΕΠΟ (10ο ΠΕΝΘ)'; }
+function isWork(s) { 
+    if (!s) return false;
+    return ['ΠΡΩΙ', 'ΑΠΟΓΕΥΜΑ', 'ΝΥΧΤΑ (3.3€)', 'ΡΕΠΟ (10ο ΠΕΝΘ)'].includes(s) || s.startsWith("[C]"); 
+}
+function isPentShift(s) { 
+    if (!s) return false;
+    return (isWork(s) || s === 'ΑΔΙΑΘΕΤΟ' || s === 'ΑΔΙΑΘΕΤΟ (ΚΥ)') && s !== 'ΡΕΠΟ (10ο ΠΕΝΘ)'; 
+}
 
 function fmt(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
 
@@ -225,7 +233,6 @@ function getHols(y) {
 function checkHasPent(dStr) {
     let data = db[dStr]; if (!data) return false;
     let d = new Date(dStr); let dw = d.getDay();
-    // Αν έχει επιλεγεί ΡΕΠΟ (10ο ΠΕΝΘ) σε οποιαδήποτε βάρδια, ΔΕΝ μετράει ως πενθήμερο πληρωμής
     if ([data.t1, data.t2, data.t3].includes('ΡΕΠΟ (10ο ΠΕΝΘ)')) return false;
 
     if (dw === 6) return isPentShift(data.t1) || isPentShift(data.t2) || isPentShift(data.t3);
@@ -285,7 +292,6 @@ function calculate() {
         d.hasPent = checkHasPent(d.dStr);
         if (d.hasPent) mPent++;
 
-        // Λογική Ρεπό από ΣΚ ή 10ο Πενθήμερο
         if (d.dw === 0 && (isWork(d.data.t1) || isWork(d.data.t2) || isWork(d.data.t3) || d.data.t1 === 'ΑΔΙΑΘΕΤΟ (ΚΥ)')) {
             if (!d.hasPent) { d.hasRepo = true; totalRepoFromWeekends += 8; }
         }
@@ -294,7 +300,6 @@ function calculate() {
         }
     });
 
-    // UI Updates... (Υπόλοιπος κώδικας ίδιος)
     let pGr = mPent * 46; let pEis = pGr * 0.02; let pTax = (pGr - pEis) * 0.20; let pNet = pGr - pEis - pTax;
     let nGr = mNight * 3.3; let nMtpy = nGr * 0.02; let nEis = nGr * 0.02; let nTax = (nGr - nMtpy - nEis) * 0.20; let nNet = nGr - nMtpy - nEis - nTax;
 
@@ -329,7 +334,13 @@ function calculate() {
         if (row.children.length === 7) { body.appendChild(row); row = document.createElement('tr'); }
         let cell = document.createElement('td'); cell.onclick = () => openModal(d.dStr);
         if (d.isH) cell.className = 'holiday-cell'; else if (d.dw === 0) cell.className = 'sun-cell'; else if (d.dw === 6) cell.className = 'sat-cell';
-        let tags = ''; [1,2,3].forEach(n => { if (d.data[`t${n}`]) tags += `<div class="shift-tag ${d.data[`type${n}`]==='night'?'night-tag':''} ${d.data[`type${n}`]==='leave'?'leave-tag':''}">${d.data[`t${n}`]}</div>`; });
+        let tags = ''; 
+        [1,2,3].forEach(n => { 
+            if (d.data[`t${n}`]) {
+                let displayShift = d.data[`t${n}`].replace("[C] ", "");
+                tags += `<div class="shift-tag ${d.data[`type${n}`]==='night'?'night-tag':''} ${d.data[`type${n}`]==='leave'?'leave-tag':''}">${displayShift}</div>`; 
+            }
+        });
         cell.innerHTML = `<div style="display:flex; justify-content:space-between"><span class="day-num">${d.date.getDate()}</span><div style="font-size:9px">${d.hasPent?'<b style="color:orange">46€</b>':''} ${d.hasRepo?'<b style="color:red">+Ρ</b>':''}</div></div>${tags}${d.data.txt?`<div class="day-note">${d.data.txt}</div>`:''}`;
         row.appendChild(cell);
     });
@@ -348,14 +359,37 @@ function calculate() {
 }
 
 function setActiveShift(s) { activeShift = s; document.querySelectorAll('.m-btn').forEach(b => b.classList.remove('active-shift')); document.getElementById(`shift${s}-btn`).classList.add('active-shift'); }
+
 function openModal(d) {
     selD = d; let s = db[d] || {}; document.getElementById('modal-date').innerText = d;
     [1,2,3].forEach(n => { document.getElementById(`c-n${n}`).value = s[`t${n}`]||''; document.getElementById(`c-h${n}`).value = s[`h${n}`]||0; document.getElementById(`c-t${n}`).value = s[`type${n}`]||''; });
     document.getElementById('c-txt').value = s.txt || '';
     let g = document.getElementById('m-opts'); g.innerHTML = '';
-    SHIFTS.forEach(o => { let b = document.createElement('div'); b.className = 'm-btn'; b.innerText = o.n; b.onclick = () => { document.getElementById(`c-n${activeShift}`).value = o.n; document.getElementById(`c-h${activeShift}`).value = o.h; document.getElementById(`c-t${activeShift}`).value = o.t; if(activeShift < 3) setActiveShift(activeShift + 1); }; g.appendChild(b); });
+    
+    SHIFTS.forEach(o => { 
+        let b = document.createElement('div'); b.className = 'm-btn'; b.innerText = o.n; 
+        b.onclick = () => { document.getElementById(`c-n${activeShift}`).value = o.n; document.getElementById(`c-h${activeShift}`).value = o.h; document.getElementById(`c-t${activeShift}`).value = o.t; if(activeShift < 3) setActiveShift(activeShift + 1); }; 
+        g.appendChild(b); 
+    });
+
+    // CUSTOM SHIFT BUTTON
+    let cb = document.createElement('div'); cb.className = 'm-btn custom-btn'; cb.innerText = 'CUSTOM +';
+    cb.onclick = () => {
+        let name = prompt("Όνομα βάρδιας (π.χ. Υπηρεσία):");
+        if(name) {
+            let hours = prompt("Πόσες ώρες;", "8");
+            let type = confirm("Είναι νυχτερινή; (OK για ΝΑΙ / Cancel για ΟΧΙ)") ? "night" : "day";
+            document.getElementById(`c-n${activeShift}`).value = "[C] " + name;
+            document.getElementById(`c-h${activeShift}`).value = parseFloat(hours);
+            document.getElementById(`c-t${activeShift}`).value = type;
+            if(activeShift < 3) setActiveShift(activeShift + 1);
+        }
+    };
+    g.appendChild(cb);
+
     setActiveShift(1); document.getElementById('modal').style.display = 'block';
 }
+
 function saveDay() {
     db[selD] = { t1: document.getElementById('c-n1').value, h1: parseFloat(document.getElementById('c-h1').value), type1: document.getElementById('c-t1').value, t2: document.getElementById('c-n2').value, h2: parseFloat(document.getElementById('c-h2').value), type2: document.getElementById('c-t2').value, t3: document.getElementById('c-n3').value, h3: parseFloat(document.getElementById('c-h3').value), type3: document.getElementById('c-t3').value, txt: document.getElementById('c-txt').value };
     localStorage.setItem('exfroura_db', JSON.stringify(db)); closeModal(); calculate();
