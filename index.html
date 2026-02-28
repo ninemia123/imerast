@@ -5,11 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ΕΞ. ΦΡΟΥΡΑ - FULL VERSION</title>
     <script src="cordova.js"></script>
-
-    <!-- PWA Manifest -->
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#000000">
-
     <style>
         :root { 
             --green: #1b5e20; --blue: #0d47a1; --red: #b71c1c; --gold: #fbc02d; 
@@ -21,17 +16,17 @@
         .header { background: var(--green); color: white; padding: 10px; }
         .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
         .header select { font-weight: bold; border-radius: 4px; border: none; padding: 10px; width: 100%; font-size: 14px; margin-top: 4px; }
-
+        
         .month-totals { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; padding: 10px; background: #e8f5e9; border-bottom: 2px solid var(--green); }
         .total-box { background: white; padding: 8px 2px; border-radius: 5px; text-align: center; border: 1px solid #c8e6c9; }
         .total-label { font-size: 9px; font-weight: bold; color: #444; display: block; }
-        .total-val { font-size: 15px; font-weight: 900; color: var(--green); }
-
+        .total-val { font-size: 14px; font-weight: 900; color: var(--green); }
+        
         .rep-container { padding: 8px 10px; background: #e3f2fd; border-bottom: 2px solid var(--blue); }
         .rep-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 8px; }
-        .rep-label-small { font-size: 10px; font-weight: 900; color: var(--blue); margin-bottom: 2px; display: block; }
-        .rep-input-compact { padding: 6px; border: 1px solid #90caf9; border-radius: 4px; background: white; font-weight: 900; font-size: 14px; text-align: center; color: var(--green); width: 100%; box-sizing: border-box; height: 32px; }
-        .rep-display-compact { padding: 6px; border: 1px solid #4caf50; border-radius: 4px; background: white; font-weight: 900; font-size: 14px; text-align: center; color: var(--green); height: 32px; display: flex; align-items: center; justify-content: center; }
+        .rep-label-small { font-size: 9px; font-weight: bold; color: var(--blue); margin-bottom: 2px; display: block; }
+        .rep-input-compact { padding: 6px; border: 1px solid #90caf9; border-radius: 4px; background: white; font-weight: 900; font-size: 13px; text-align: center; color: var(--green); width: 100%; box-sizing: border-box; height: 32px; }
+        .rep-display-compact { padding: 6px; border: 1px solid #4caf50; border-radius: 4px; background: white; font-weight: 900; font-size: 13px; text-align: center; color: var(--green); height: 32px; display: flex; align-items: center; justify-content: center; }
 
         .leave-panel { background: #f3e5f5; padding: 10px; border-bottom: 2px solid var(--purple); display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
         .leave-item { background: white; padding: 8px 4px; border-radius: 4px; text-align: center; border: 1px solid #d1c4e9; }
@@ -42,6 +37,13 @@
         .w-tile { background: white; border: 1px solid #ccc; padding: 4px; border-radius: 4px; text-align: center; font-size: 9px; line-height: 1.2; }
         .w-val { font-weight: 900; font-size: 11px; display: block; color: var(--blue); }
         .w-diff { font-weight: 900; font-size: 11px; display: block; color: var(--red); }
+
+        .penthemera-box { background: #fff3e0; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 5px solid #ff9800; }
+        .penthemera-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .penthemera-item { background: white; padding: 8px; border-radius: 4px; text-align: center; }
+
+        .repo-transfer-box { background: #e8f5e9; padding: 10px; border-radius: 5px; margin: 10px 0; border-left: 5px solid var(--green); }
+        .repo-transfer-row { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; padding: 5px 0; }
 
         table { width: 100%; border-collapse: collapse; table-layout: fixed; }
         td { border: 1px solid #bbb; height: 110px; vertical-align: top; padding: 4px; cursor: pointer; background: white; overflow: hidden; }
@@ -58,119 +60,331 @@
         .modal-content { background: white; width: 98%; max-width: 550px; margin: 5px auto; padding: 10px; border-radius: 8px; max-height: 95vh; overflow-y: auto; box-sizing: border-box; }
         .m-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; margin-bottom: 10px; }
         .m-btn { padding: 10px 4px; border: 1px solid #ccc; background: #f5f5f5; font-weight: bold; font-size: 11px; cursor: pointer; }
-        .active-shift { background: #2196f3 !important; color: white !important; }
-
+        .shift-row { display: grid; grid-template-columns: 1.8fr 0.8fr 1fr; gap: 4px; margin-bottom: 6px; }
+        .shift-row input { width: 100%; padding: 8px 4px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; font-size: 14px; box-sizing: border-box; }
+        
         .footer { padding: 15px; background: #fafafa; border-top: 4px solid var(--green); }
         .money-line { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 6px 0; font-size: 14px; font-weight: 900; }
         .total-net-box { background: var(--green); color: white; padding: 15px; text-align: center; font-size: 1.8em; font-weight: 900; border-radius: 8px; margin: 10px 0; }
+        .active-shift { background: #2196f3 !important; color: white !important; }
+        .custom-btn { background: #ffeb3b !important; color: #000 !important; }
     </style>
 </head>
 <body>
 <div class="main-card">
     <div class="header">
         <div class="top-row">
-            <span>ΕΞΩΤΕΡΙΚΗ ΦΡΟΥΡΑ</span>
-            <select>
-                <option>Ιανουάριος</option>
-                <option>Φεβρουάριος</option>
-            </select>
+            <b>ΕΞ. ΦΡΟΥΡΑ - FULL VERSION</b>
+            <div>
+                <button onclick="nav(-1)">◄</button> <span id="month-label"></span> <button onclick="nav(1)">►</button>
+            </div>
         </div>
+        <select id="mode-sel" onchange="saveMode()">
+            <option value="32">32 ώρες</option>
+            <option value="27">27 ώρες (-5)</option>
+            <option value="22">22 ώρες (-10)</option>
+        </select>
     </div>
-
+    
     <div class="month-totals">
-        <div class="total-box">
-            <span class="total-label">Συνολικές ώρες</span>
-            <span class="total-val">160</span>
-        </div>
-        <div class="total-box">
-            <span class="total-label">Νυχτερινές</span>
-            <span class="total-val">40</span>
-        </div>
-        <div class="total-box">
-            <span class="total-label">Άδειες</span>
-            <span class="total-val">5</span>
-        </div>
-        <div class="total-box">
-            <span class="total-label">Ασθένειες</span>
-            <span class="total-val">2</span>
-        </div>
+        <div class="total-box"><span class="total-label">ΣΤΟΧΟΣ</span><span class="total-val" id="m-target">0.0</span></div>
+        <div class="total-box"><span class="total-label">ΠΕΝΘ/ΡΑ</span><span class="total-val" id="m-penthemera">0</span></div>
+        <div class="total-box"><span class="total-label">ΝΥΧΤΕΣ</span><span class="total-val" id="m-night">0.0</span></div>
+        <div class="total-box"><span class="total-label">ΡΕΠΟ ΣΚ</span><span class="total-val" id="m-repo">0</span></div>
     </div>
-
+    
     <div class="rep-container">
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-bottom: 10px;">
+            <div>
+                <span class="rep-label-small">ΜΕΙΩΜΕΝΟ</span>
+                <select id="reduced-select" class="rep-input-compact" onchange="calculate()">
+                    <option value="normal">Κανονικό</option>
+                    <option value="minus1">-1 ώρα</option>
+                    <option value="minus2">-2 ώρες</option>
+                </select>
+            </div>
+            <div>
+                <span class="rep-label-small">ΠΛΗΡΩΜΕΝΕΣ (ώρες)</span>
+                <input type="number" id="paidHours" class="rep-input-compact" value="0" onchange="savePaidHours()">
+            </div>
+        </div>
         <div class="rep-grid">
-            <div>
-                <span class="rep-label-small">Σάββατα</span>
-                <input type="number" class="rep-input-compact" value="4">
-            </div>
-            <div>
-                <span class="rep-label-small">Κυριακές</span>
-                <input type="number" class="rep-input-compact" value="4">
-            </div>
+            <div class="rep-grid-item"><span class="rep-label-small">ΠΡ/ΜΗΝ (ώρες)</span><div id="prminRep" class="rep-display-compact">0</div></div>
+            <div class="rep-grid-item"><span class="rep-label-small">ΜΕΤΑΦΟΡΑ (ώρες)</span><div id="transferRep" class="rep-display-compact" style="color:var(--orange)">0</div></div>
         </div>
+        <button onclick="saveRepTransfer()" style="width:100%; padding:10px; background:var(--blue); color:white; border:none; border-radius:4px; font-weight:bold; margin-top:5px;">ΑΠΟΘΗΚΕΥΣΗ ΡΕΠΟ</button>
     </div>
-
+    
     <div class="leave-panel">
-        <div class="leave-item">
-            <span class="leave-count">2</span>
-            <span class="leave-name">ΑΔΕΙΑ</span>
-        </div>
-        <div class="leave-item">
-            <span class="leave-count">1</span>
-            <span class="leave-name">ΑΣΘΕΝΕΙΑ</span>
-        </div>
-        <div class="leave-item">
-            <span class="leave-count">0</span>
-            <span class="leave-name">ΣΥΝΑΔΕΛΦΟΣ</span>
-        </div>
-        <div class="leave-item">
-            <span class="leave-count">3</span>
-            <span class="leave-name">ΑΠΟΥΣΙΑ</span>
+        <div class="leave-item"><div class="leave-count" id="leave-normal">0</div><div class="leave-name">ΚΑΝΟΝΙΚΗ (34)</div></div>
+        <div class="leave-item"><div class="leave-count" id="leave-short">0</div><div class="leave-name">ΒΡΑΧΕΙΑ (11)</div></div>
+        <div class="leave-item"><div class="leave-count" id="leave-sick">0</div><div class="leave-name">ΑΝΑΡΡΩΤΙΚΗ</div></div>
+        <div class="leave-item"><div class="leave-count" id="leave-special">0</div><div class="leave-name">ΕΙΔΙΚΗ</div></div>
+    </div>
+
+    <div class="weeks-banner" id="weeks-stats"></div>
+
+    <div class="penthemera-box">
+        <div class="penthemera-grid">
+            <div class="penthemera-item"><div style="font-size: 11px; font-weight: bold;">Πενθήμερα</div><div id="p-count" style="font-size: 16px; font-weight: 900;">0</div></div>
+            <div class="penthemera-item"><div style="font-size: 11px; font-weight: bold;">Μεικτό (46€)</div><div id="p-gross" style="font-size: 16px; font-weight: 900;">0.00€</div></div>
+            <div class="penthemera-item"><div style="font-size: 11px; font-weight: bold;">Εισφορά 2%</div><div id="p-eis" style="font-size: 14px; color: var(--red);">0.00€</div></div>
+            <div class="penthemera-item"><div style="font-size: 11px; font-weight: bold;">Φόρος 20%</div><div id="p-tax" style="font-size: 14px; color: var(--red);">0.00€</div></div>
+            <div class="penthemera-item" style="grid-column: span 2; background: #e8f5e9;"><div style="font-size: 11px; font-weight: bold;">ΚΑΘΑΡΟ ΠΕΝΘΗΜΕΡΩΝ</div><div id="p-net" style="font-size: 20px; font-weight: 900; color: var(--green);">0.00€</div></div>
         </div>
     </div>
 
-    <div class="weeks-banner">
-        <div class="w-tile"><span class="w-val">1</span><span class="w-diff">+0</span></div>
-        <div class="w-tile"><span class="w-val">2</span><span class="w-diff">-1</span></div>
-        <div class="w-tile"><span class="w-val">3</span><span class="w-diff">0</span></div>
-        <div class="w-tile"><span class="w-val">4</span><span class="w-diff">+1</span></div>
-        <div class="w-tile"><span class="w-val">5</span><span class="w-diff">0</span></div>
+    <div class="repo-transfer-box">
+        <div class="repo-transfer-row"><span>Ρεπό ΣΚ/Αργίες:</span><span id="repo-from-weekends">0</span></div>
+        <div class="repo-transfer-row"><span>+/- Ώρες:</span><span id="extra-hours">0.0</span></div>
+        <div class="repo-transfer-row"><span>ΣΥΝΟΛΟ ΩΡΩΝ ΜΗΝΑ:</span><span id="total-month-hours">0.0</span></div>
     </div>
 
-    <table>
-        <tr>
-            <td class="sat-cell"><span class="day-num">1</span><span class="shift-tag">08:00-16:00</span></td>
-            <td class="sun-cell"><span class="day-num">2</span><span class="shift-tag night-tag">22:00-06:00</span></td>
-            <td><span class="day-num">3</span></td>
-            <td><span class="day-num">4</span></td>
-            <td class="holiday-cell"><span class="day-num">5</span><span class="leave-tag">ΑΔΕΙΑ</span></td>
-        </tr>
+    <table id="cal-table">
+        <thead><tr><th>ΔΕ</th><th>ΤΡ</th><th>ΤΕ</th><th>ΠΕ</th><th>ΠΑ</th><th>ΣΑ</th><th>ΚΥ</th></tr></thead>
+        <tbody id="cal-body"></tbody>
     </table>
-
+    
     <div class="footer">
-        <div class="money-line"><span>Βασικός</span><span>1200€</span></div>
-        <div class="money-line"><span>Επικίνδυνο</span><span>100€</span></div>
-        <div class="total-net-box">Σύνολο: 1300€</div>
+        <div style="background:#e3f2fd; padding:10px; border-radius:5px; margin-bottom:10px;">
+            <div class="money-line"><span>Μεικτά Νυχτερινά:</span><b id="night-gross">0.00€</b></div>
+            <div class="money-line"><span>ΜΤΠΥ (2%):</span><b id="night-mtpy" style="color:var(--red)">0.00€</b></div>
+            <div class="money-line"><span>Εισφορά (2%):</span><b id="night-eisfora" style="color:var(--red)">0.00€</b></div>
+            <div class="money-line"><span>Φόρος (20%):</span><b id="night-tax" style="color:var(--red)">0.00€</b></div>
+            <div class="money-line" style="border-top:2px solid var(--blue); margin-top:5px; padding-top:5px;"><span>ΚΑΘΑΡΑ ΝΥΧΤΕΡΙΝΑ:</span><b id="night-net" style="color:var(--blue)">0.00€</b></div>
+        </div>
+        <div class="total-net-box" id="total-net-combined">0.00€</div>
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+            <button onclick="exportData()" style="padding:10px; font-size:11px;">💾 EXPORT</button>
+            <button onclick="document.getElementById('importFile').click()" style="padding:10px; font-size:11px;">📂 IMPORT</button>
+            <input type="file" id="importFile" style="display:none" onchange="importData(event)">
+        </div>
     </div>
 </div>
 
 <div id="modal" class="modal">
     <div class="modal-content">
-        <div class="m-grid">
-            <div class="m-btn">08:00-16:00</div>
-            <div class="m-btn">16:00-22:00</div>
-            <div class="m-btn active-shift">22:00-06:00</div>
-            <div class="m-btn leave-tag">Άδεια</div>
+        <div id="modal-date" style="text-align:center; font-weight:bold; margin-bottom:10px;"></div>
+        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 5px; margin-bottom: 10px;">
+            <button class="m-btn" onclick="setActiveShift(1)" id="shift1-btn">Βάρδια 1</button>
+            <button class="m-btn" onclick="setActiveShift(2)" id="shift2-btn">Βάρδια 2</button>
+            <button class="m-btn" onclick="setActiveShift(3)" id="shift3-btn">Βάρδια 3</button>
         </div>
+        <div class="m-grid" id="m-opts"></div>
+        <hr>
+        <div class="shift-row"><input type="text" id="c-n1" readonly><input type="number" id="c-h1" step="0.5"><input type="text" id="c-t1" hidden></div>
+        <div class="shift-row"><input type="text" id="c-n2" readonly><input type="number" id="c-h2" step="0.5"><input type="text" id="c-t2" hidden></div>
+        <div class="shift-row"><input type="text" id="c-n3" readonly><input type="number" id="c-h3" step="0.5"><input type="text" id="c-t3" hidden></div>
+        <input type="text" id="c-txt" placeholder="Σχόλιο..." style="width:100%; padding:10px; margin:10px 0; box-sizing:border-box;">
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
+            <button onclick="saveDay()" style="padding:15px; background:var(--green); color:white; border:none; border-radius:4px; font-weight:bold;">ΑΠΟΘΗΚΕΥΣΗ</button>
+            <button onclick="deleteDay()" style="padding:15px; background:var(--red); color:white; border:none; border-radius:4px; font-weight:bold;">ΔΙΑΓΡΑΦΗ</button>
+        </div>
+        <button onclick="closeModal()" style="width:100%; padding:10px; background:#ccc; border:none; border-radius:4px; font-weight:bold; margin-top:5px;">ΚΛΕΙΣΙΜΟ</button>
     </div>
 </div>
 
 <script>
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js')
-        .then(() => console.log('Service Worker registered'))
-        .catch(err => console.log('Service Worker registration failed:', err));
-}
-</script>
+let cur = new Date();
+let db = JSON.parse(localStorage.getItem('exfroura_db') || '{}');
+let settings = JSON.parse(localStorage.getItem('exfroura_settings') || '{"mode":"32"}');
+let repStorage = JSON.parse(localStorage.getItem('exfroura_rep') || '{"savedTransfers": {}}');
+let selD = '', activeShift = 1;
 
+const SHIFTS = [
+    {n:'ΠΡΩΙ', h:8, t:'day'}, {n:'ΑΠΟΓΕΥΜΑ', h:8, t:'day'}, {n:'ΝΥΧΤΑ (3.3€)', h:8, t:'night'},
+    {n:'ΡΕΠΟ (10ο ΠΕΝΘ)', h:8, t:'repo10'},
+    {n:'ΑΔΙΑΘΕΤΟ', h:0, t:'pent'}, {n:'ΑΔΙΑΘΕΤΟ (ΚΥ)', h:0, t:'pent'}, {n:'ΡΕΠΟ', h:0, t:'rest'},
+    {n:'ΚΑΝΟΝΙΚΗ ΑΔΕΙΑ', h:0, t:'leave'}, {n:'ΒΡΑΧΕΙΑ', h:0, t:'leave'}, 
+    {n:'ΑΝΑΡΡΩΤΙΚΗ', h:0, t:'leave'}, {n:'ΕΙΔΙΚΗ ΑΔΕΙΑ', h:0, t:'leave'}
+];
+
+function isWork(s) { 
+    if (!s) return false;
+    return ['ΠΡΩΙ', 'ΑΠΟΓΕΥΜΑ', 'ΝΥΧΤΑ (3.3€)', 'ΡΕΠΟ (10ο ΠΕΝΘ)'].includes(s) || s.startsWith("[C]"); 
+}
+function isPentShift(s) { 
+    if (!s) return false;
+    return (isWork(s) || s === 'ΑΔΙΑΘΕΤΟ' || s === 'ΑΔΙΑΘΕΤΟ (ΚΥ)') && s !== 'ΡΕΠΟ (10ο ΠΕΝΘ)'; 
+}
+function fmt(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
+
+function getHols(y) {
+    let h = [fmt(new Date(y,0,1)), fmt(new Date(y,0,6)), fmt(new Date(y,2,25)), fmt(new Date(y,4,1)), fmt(new Date(y,7,15)), fmt(new Date(y,9,28)), fmt(new Date(y,11,25)), fmt(new Date(y,11,26))];
+    let a=y%19, d=(19*a+15)%30, e=(2*(y%4)+4*(y%7)+6*d+6)%7;
+    let p=d+e+22+13; let m=3, day=p; if(day>31){day-=31; m=4;} if(day>30){day-=30; m=5;}
+    let easter = new Date(y, m-1, day);
+    const add = (o) => { let x=new Date(easter); x.setDate(easter.getDate()+o); h.push(fmt(x)); };
+    add(-48); add(-2); add(1); add(50); return h;
+}
+
+function checkHasPent(dStr) {
+    let data = db[dStr]; if (!data) return false;
+    let d = new Date(dStr); let dw = d.getDay();
+    if ([data.t1, data.t2, data.t3].includes('ΡΕΠΟ (10ο ΠΕΝΘ)')) return false;
+    if (dw === 6) return isPentShift(data.t1) || isPentShift(data.t2) || isPentShift(data.t3);
+    if (dw === 0) {
+        if (!(isWork(data.t1) || isWork(data.t2) || isWork(data.t3) || data.t1 === 'ΑΔΙΑΘΕΤΟ (ΚΥ)')) return false;
+        let prev = new Date(d); prev.setDate(d.getDate() - 1);
+        if (checkHasPent(fmt(prev))) return false;
+        return true;
+    }
+    return false;
+}
+
+function calculate() {
+    const y = cur.getFullYear(), m = cur.getMonth(), hols = getHols(y);
+    document.getElementById('month-label').innerText = new Intl.DateTimeFormat('el-GR', {month:'short', year:'numeric'}).format(cur).toUpperCase();
+    
+    let days = new Date(y, m + 1, 0).getDate();
+    let startDayIdx = (new Date(y, m, 1).getDay() + 6) % 7;
+    let allDays = [];
+    for(let d=1; d<=days; d++) {
+        let dStr = fmt(new Date(y, m, d));
+        allDays.push({ dStr, date: new Date(y,m,d), dw: new Date(y,m,d).getDay(), isH: hols.includes(dStr), data: db[dStr]||{}, hasPent: false, hasRepo: false });
+    }
+
+    let mTarget = 0, mNight = 0, mPent = 0, mActualTotal = 0, totalRepoFromWeekends = 0;
+    let leaves = {'ΚΑΝΟΝΙΚΗ ΑΔΕΙΑ':0, 'ΒΡΑΧΕΙΑ':0, 'ΑΝΑΡΡΩΤΙΚΗ':0, 'ΕΙΔΙΚΗ ΑΔΕΙΑ':0};
+    let baseWeekly = parseInt(settings.mode);
+    let reduced = document.getElementById('reduced-select').value;
+    if(reduced==='minus1') baseWeekly -= 5; else if(reduced==='minus2') baseWeekly -= 10;
+    const dailyRate = baseWeekly / 5;
+
+    let weeksHtml = '', currentWeekTarget = 0, currentWeekActual = 0, weekCount = 1;
+
+    allDays.forEach((d, idx) => {
+        let hasLeave = [d.data.t1, d.data.t2, d.data.t3].some(l => leaves.hasOwnProperty(l));
+        let dayTarget = (d.dw >= 1 && d.dw <= 5 && !d.isH && !hasLeave) ? dailyRate : 0;
+        let dayActual = 0;
+
+        [1,2,3].forEach(n => {
+            let shiftName = d.data[`t${n}`];
+            if (isWork(shiftName)) {
+                let h = parseFloat(d.data[`h${n}`]||0);
+                dayActual += h;
+                if (d.data[`type${n}`]==='night') mNight += h;
+            }
+            if (leaves.hasOwnProperty(shiftName)) leaves[shiftName]++;
+        });
+
+        mTarget += dayTarget; mActualTotal += dayActual;
+        currentWeekTarget += dayTarget; currentWeekActual += dayActual;
+
+        if (d.dw === 0 || idx === allDays.length - 1) {
+            weeksHtml += `<div class="w-tile">ΕΒΔ ${weekCount}<br><span class="w-val">ΣΤ: ${currentWeekTarget.toFixed(1)}</span><span class="w-diff">Δ: ${(currentWeekActual - currentWeekTarget).toFixed(1)}</span></div>`;
+            currentWeekTarget = 0; currentWeekActual = 0; weekCount++;
+        }
+
+        d.hasPent = checkHasPent(d.dStr);
+        if (d.hasPent) mPent++;
+        if (d.dw === 0 && (isWork(d.data.t1) || isWork(d.data.t2) || isWork(d.data.t3) || d.data.t1 === 'ΑΔΙΑΘΕΤΟ (ΚΥ)')) {
+            if (!d.hasPent) { d.hasRepo = true; totalRepoFromWeekends += 8; }
+        }
+        if (d.isH && d.dw >= 1 && d.dw <= 5 && (isWork(d.data.t1) || isWork(d.data.t2) || isWork(d.data.t3))) {
+            d.hasRepo = true; totalRepoFromWeekends += 8;
+        }
+    });
+
+    document.getElementById('weeks-stats').innerHTML = weeksHtml;
+    document.getElementById('m-target').innerText = mTarget.toFixed(1);
+    document.getElementById('m-penthemera').innerText = mPent;
+    document.getElementById('m-night').innerText = mNight.toFixed(1);
+    document.getElementById('m-repo').innerText = (totalRepoFromWeekends/8).toFixed(0);
+    document.getElementById('repo-from-weekends').innerText = totalRepoFromWeekends.toFixed(1);
+    document.getElementById('extra-hours').innerText = (mActualTotal - mTarget).toFixed(1);
+    document.getElementById('total-month-hours').innerText = (mActualTotal - mTarget + totalRepoFromWeekends).toFixed(1);
+    
+    document.getElementById('leave-normal').innerText = leaves['ΚΑΝΟΝΙΚΗ ΑΔΕΙΑ'];
+    document.getElementById('leave-short').innerText = leaves['ΒΡΑΧΕΙΑ'];
+    document.getElementById('leave-sick').innerText = leaves['ΑΝΑΡΡΩΤΙΚΗ'];
+    document.getElementById('leave-special').innerText = leaves['ΕΙΔΙΚΗ ΑΔΕΙΑ'];
+
+    let pGr = mPent * 46, pEis = pGr * 0.02, pTax = (pGr - pEis) * 0.20, pNet = pGr - pEis - pTax;
+    document.getElementById('p-count').innerText = mPent; 
+    document.getElementById('p-gross').innerText = pGr.toFixed(2)+'€';
+    document.getElementById('p-eis').innerText = pEis.toFixed(2)+'€';
+    document.getElementById('p-tax').innerText = pTax.toFixed(2)+'€'; 
+    document.getElementById('p-net').innerText = pNet.toFixed(2)+'€';
+    
+    let nGr = mNight * 3.3, nMtpy = nGr * 0.02, nEis = nGr * 0.02, nTax = (nGr - nMtpy - nEis) * 0.20, nNet = nGr - nMtpy - nEis - nTax;
+    document.getElementById('night-gross').innerText = nGr.toFixed(2)+'€';
+    document.getElementById('night-mtpy').innerText = nMtpy.toFixed(2)+'€';
+    document.getElementById('night-eisfora').innerText = nEis.toFixed(2)+'€';
+    document.getElementById('night-tax').innerText = nTax.toFixed(2)+'€';
+    document.getElementById('night-net').innerText = nNet.toFixed(2)+'€';
+    document.getElementById('total-net-combined').innerText = (nNet + pNet).toFixed(2)+'€';
+
+    let body = document.getElementById('cal-body'); body.innerHTML = '';
+    let row = document.createElement('tr');
+    for(let i=0; i<startDayIdx; i++) row.appendChild(document.createElement('td'));
+    allDays.forEach(d => {
+        if (row.children.length === 7) { body.appendChild(row); row = document.createElement('tr'); }
+        let cell = document.createElement('td'); cell.onclick = () => openModal(d.dStr);
+        if (d.isH) cell.className = 'holiday-cell'; else if (d.dw === 0) cell.className = 'sun-cell'; else if (d.dw === 6) cell.className = 'sat-cell';
+        let tags = ''; [1,2,3].forEach(n => { 
+            if (d.data[`t${n}`]) {
+                let display = d.data[`t${n}`].replace("[C] ", "");
+                tags += `<div class="shift-tag ${d.data[`type${n}`]==='night'?'night-tag':''} ${d.data[`type${n}`]==='leave'?'leave-tag':''}">${display}</div>`; 
+            }
+        });
+        cell.innerHTML = `<div style="display:flex; justify-content:space-between"><span class="day-num">${d.date.getDate()}</span><div style="font-size:9px">${d.hasPent?'<b style="color:orange">46€</b>':''} ${d.hasRepo?'<b style="color:red">+Ρ</b>':''}</div></div>${tags}${d.data.txt?`<div class="day-note">${d.data.txt}</div>`:''}`;
+        row.appendChild(cell);
+    });
+    body.appendChild(row);
+
+    let pk = y + '-' + String(m+1).padStart(2,'0');
+    let prev = new Date(y, m-1, 1), prevK = prev.getFullYear() + '-' + String(prev.getMonth()+1).padStart(2,'0');
+    let prmin = repStorage.savedTransfers[prevK] || 0;
+    let paid = parseFloat(localStorage.getItem('paid_'+pk)) || 0;
+    document.getElementById('paidHours').value = paid;
+    document.getElementById('prminRep').innerText = prmin.toFixed(1);
+    document.getElementById('transferRep').innerText = (prmin + (mActualTotal - mTarget + totalRepoFromWeekends) - paid).toFixed(1);
+}
+
+function setActiveShift(s) { activeShift = s; document.querySelectorAll('.m-btn').forEach(b => b.classList.remove('active-shift')); document.getElementById(`shift${s}-btn`).classList.add('active-shift'); }
+
+function openModal(d) {
+    selD = d; let s = db[d] || {}; document.getElementById('modal-date').innerText = d;
+    [1,2,3].forEach(n => { document.getElementById(`c-n${n}`).value = s[`t${n}`]||''; document.getElementById(`c-h${n}`).value = s[`h${n}`]||0; document.getElementById(`c-t${n}`).value = s[`type${n}`]||''; });
+    document.getElementById('c-txt').value = s.txt || '';
+    let g = document.getElementById('m-opts'); g.innerHTML = '';
+    
+    SHIFTS.forEach(o => { 
+        let b = document.createElement('div'); b.className = 'm-btn'; b.innerText = o.n; 
+        b.onclick = () => { document.getElementById(`c-n${activeShift}`).value = o.n; document.getElementById(`c-h${activeShift}`).value = o.h; document.getElementById(`c-t${activeShift}`).value = o.t; if(activeShift < 3) setActiveShift(activeShift + 1); }; 
+        g.appendChild(b); 
+    });
+
+    let cb = document.createElement('div'); cb.className = 'm-btn custom-btn'; cb.innerText = 'CUSTOM +';
+    cb.onclick = () => {
+        let name = prompt("Όνομα βάρδιας:");
+        if(name) {
+            let hours = prompt("Ώρες;", "8");
+            let type = confirm("Είναι νυχτερινή;") ? "night" : "day";
+            document.getElementById(`c-n${activeShift}`).value = "[C] " + name;
+            document.getElementById(`c-h${activeShift}`).value = parseFloat(hours);
+            document.getElementById(`c-t${activeShift}`).value = type;
+            if(activeShift < 3) setActiveShift(activeShift + 1);
+        }
+    };
+    g.appendChild(cb);
+    setActiveShift(1); document.getElementById('modal').style.display = 'block';
+}
+
+function saveDay() {
+    db[selD] = { t1: document.getElementById('c-n1').value, h1: parseFloat(document.getElementById('c-h1').value), type1: document.getElementById('c-t1').value, t2: document.getElementById('c-n2').value, h2: parseFloat(document.getElementById('c-h2').value), type2: document.getElementById('c-t2').value, t3: document.getElementById('c-n3').value, h3: parseFloat(document.getElementById('c-h3').value), type3: document.getElementById('c-t3').value, txt: document.getElementById('c-txt').value };
+    localStorage.setItem('exfroura_db', JSON.stringify(db)); closeModal(); calculate();
+}
+function deleteDay() { delete db[selD]; localStorage.setItem('exfroura_db', JSON.stringify(db)); closeModal(); calculate(); }
+function closeModal() { document.getElementById('modal').style.display = 'none'; }
+function nav(v) { cur.setMonth(cur.getMonth() + v); calculate(); }
+function saveMode() { settings.mode = document.getElementById('mode-sel').value; localStorage.setItem('exfroura_settings', JSON.stringify(settings)); calculate(); }
+function savePaidHours() { let pk = cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0'); localStorage.setItem('paid_'+pk, document.getElementById('paidHours').value); calculate(); }
+function saveRepTransfer() { let pk = cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0'); repStorage.savedTransfers[pk] = parseFloat(document.getElementById('transferRep').innerText); localStorage.setItem('exfroura_rep', JSON.stringify(repStorage)); alert("Αποθηκεύτηκε!"); }
+function exportData() { let b = new Blob([JSON.stringify({db, settings, repStorage})], {type:'application/json'}); let a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download="backup.json"; a.click(); }
+function importData(e) { let f = e.target.files[0]; let r = new FileReader(); r.onload=(x)=>{ let d = JSON.parse(x.target.result); db=d.db; settings=d.settings; repStorage=d.repStorage; localStorage.setItem('exfroura_db', JSON.stringify(db)); calculate(); }; r.readAsText(f); }
+document.addEventListener('DOMContentLoaded', () => { document.getElementById('mode-sel').value = settings.mode; calculate(); });
+</script>
 </body>
 </html>
