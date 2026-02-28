@@ -4,7 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ΕΞ. ΦΡΟΥΡΑ - FULL VERSION</title>
-    <script src="cordova.js"></script>
+    <link rel="manifest" href="/imerast/manifest.json">
+<meta name="theme-color" content="#1b5e20">
+<script src="cordova.js"></script>
     <style>
         :root { 
             --green: #1b5e20; --blue: #0d47a1; --red: #b71c1c; --gold: #fbc02d; 
@@ -385,6 +387,20 @@ function saveRepTransfer() { let pk = cur.getFullYear()+'-'+String(cur.getMonth(
 function exportData() { let b = new Blob([JSON.stringify({db, settings, repStorage})], {type:'application/json'}); let a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download="backup.json"; a.click(); }
 function importData(e) { let f = e.target.files[0]; let r = new FileReader(); r.onload=(x)=>{ let d = JSON.parse(x.target.result); db=d.db; settings=d.settings; repStorage=d.repStorage; localStorage.setItem('exfroura_db', JSON.stringify(db)); calculate(); }; r.readAsText(f); }
 document.addEventListener('DOMContentLoaded', () => { document.getElementById('mode-sel').value = settings.mode; calculate(); });
+
+<script>
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/imerast/service-worker.js')
+      .then(function(reg) {
+        console.log("Service Worker registered", reg);
+      })
+      .catch(function(err) {
+        console.log("Service Worker error", err);
+      });
+  });
+}
 </script>
+
 </body>
 </html>
