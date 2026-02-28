@@ -20,13 +20,13 @@
         .month-totals { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; padding: 10px; background: #e8f5e9; border-bottom: 2px solid var(--green); }
         .total-box { background: white; padding: 8px 2px; border-radius: 5px; text-align: center; border: 1px solid #c8e6c9; }
         .total-label { font-size: 9px; font-weight: bold; color: #444; display: block; }
-        .total-val { font-size: 15px; font-weight: 900; color: var(--green); }
+        .total-val { font-size: 14px; font-weight: 900; color: var(--green); }
         
         .rep-container { padding: 8px 10px; background: #e3f2fd; border-bottom: 2px solid var(--blue); }
         .rep-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; margin-bottom: 8px; }
-        .rep-label-small { font-size: 10px; font-weight: 900; color: var(--blue); margin-bottom: 2px; display: block; }
-        .rep-input-compact { padding: 6px; border: 1px solid #90caf9; border-radius: 4px; background: white; font-weight: 900; font-size: 14px; text-align: center; color: var(--green); width: 100%; box-sizing: border-box; height: 32px; }
-        .rep-display-compact { padding: 6px; border: 1px solid #4caf50; border-radius: 4px; background: white; font-weight: 900; font-size: 14px; text-align: center; color: var(--green); height: 32px; display: flex; align-items: center; justify-content: center; }
+        .rep-label-small { font-size: 9px; font-weight: bold; color: var(--blue); margin-bottom: 2px; display: block; }
+        .rep-input-compact { padding: 6px; border: 1px solid #90caf9; border-radius: 4px; background: white; font-weight: 900; font-size: 13px; text-align: center; color: var(--green); width: 100%; box-sizing: border-box; height: 32px; }
+        .rep-display-compact { padding: 6px; border: 1px solid #4caf50; border-radius: 4px; background: white; font-weight: 900; font-size: 13px; text-align: center; color: var(--green); height: 32px; display: flex; align-items: center; justify-content: center; }
 
         .leave-panel { background: #f3e5f5; padding: 10px; border-bottom: 2px solid var(--purple); display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; }
         .leave-item { background: white; padding: 8px 4px; border-radius: 4px; text-align: center; border: 1px solid #d1c4e9; }
@@ -60,12 +60,13 @@
         .modal-content { background: white; width: 98%; max-width: 550px; margin: 5px auto; padding: 10px; border-radius: 8px; max-height: 95vh; overflow-y: auto; box-sizing: border-box; }
         .m-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; margin-bottom: 10px; }
         .m-btn { padding: 10px 4px; border: 1px solid #ccc; background: #f5f5f5; font-weight: bold; font-size: 11px; cursor: pointer; }
-        .active-shift { background: #2196f3 !important; color: white !important; }
+        .shift-row { display: grid; grid-template-columns: 1.8fr 0.8fr 1fr; gap: 4px; margin-bottom: 6px; }
+        .shift-row input { width: 100%; padding: 8px 4px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; font-size: 14px; box-sizing: border-box; }
         
         .footer { padding: 15px; background: #fafafa; border-top: 4px solid var(--green); }
         .money-line { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 6px 0; font-size: 14px; font-weight: 900; }
         .total-net-box { background: var(--green); color: white; padding: 15px; text-align: center; font-size: 1.8em; font-weight: 900; border-radius: 8px; margin: 10px 0; }
-        
+        .active-shift { background: #2196f3 !important; color: white !important; }
         .custom-btn { background: #ffeb3b !important; color: #000 !important; }
     </style>
 </head>
@@ -111,7 +112,7 @@
             <div class="rep-grid-item"><span class="rep-label-small">ΠΡ/ΜΗΝ (ώρες)</span><div id="prminRep" class="rep-display-compact">0</div></div>
             <div class="rep-grid-item"><span class="rep-label-small">ΜΕΤΑΦΟΡΑ (ώρες)</span><div id="transferRep" class="rep-display-compact" style="color:var(--orange)">0</div></div>
         </div>
-        <div style="font-size: 10px; color: #666; text-align: center; margin-top: -5px;">* Η μεταφορά γίνεται αυτόματα στον επόμενο μήνα</div>
+        <button onclick="saveRepTransfer()" style="width:100%; padding:10px; background:var(--blue); color:white; border:none; border-radius:4px; font-weight:bold; margin-top:5px;">ΑΠΟΘΗΚΕΥΣΗ ΡΕΠΟ</button>
     </div>
     
     <div class="leave-panel">
@@ -171,21 +172,9 @@
         </div>
         <div class="m-grid" id="m-opts"></div>
         <hr>
-        <div style="display: grid; grid-template-columns: 1.8fr 0.8fr 1fr; gap: 4px; margin-bottom: 6px;">
-            <input type="text" id="c-n1" readonly style="width:100%; border:1px solid #ccc; padding:8px 2px; font-weight:bold;">
-            <input type="number" id="c-h1" step="0.5" style="width:100%; border:1px solid #ccc; padding:8px 2px; font-weight:bold;">
-            <input type="text" id="c-t1" hidden>
-        </div>
-        <div style="display: grid; grid-template-columns: 1.8fr 0.8fr 1fr; gap: 4px; margin-bottom: 6px;">
-            <input type="text" id="c-n2" readonly style="width:100%; border:1px solid #ccc; padding:8px 2px; font-weight:bold;">
-            <input type="number" id="c-h2" step="0.5" style="width:100%; border:1px solid #ccc; padding:8px 2px; font-weight:bold;">
-            <input type="text" id="c-t2" hidden>
-        </div>
-        <div style="display: grid; grid-template-columns: 1.8fr 0.8fr 1fr; gap: 4px; margin-bottom: 6px;">
-            <input type="text" id="c-n3" readonly style="width:100%; border:1px solid #ccc; padding:8px 2px; font-weight:bold;">
-            <input type="number" id="c-h3" step="0.5" style="width:100%; border:1px solid #ccc; padding:8px 2px; font-weight:bold;">
-            <input type="text" id="c-t3" hidden>
-        </div>
+        <div class="shift-row"><input type="text" id="c-n1" readonly><input type="number" id="c-h1" step="0.5"><input type="text" id="c-t1" hidden></div>
+        <div class="shift-row"><input type="text" id="c-n2" readonly><input type="number" id="c-h2" step="0.5"><input type="text" id="c-t2" hidden></div>
+        <div class="shift-row"><input type="text" id="c-n3" readonly><input type="number" id="c-h3" step="0.5"><input type="text" id="c-t3" hidden></div>
         <input type="text" id="c-txt" placeholder="Σχόλιο..." style="width:100%; padding:10px; margin:10px 0; box-sizing:border-box;">
         <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px;">
             <button onclick="saveDay()" style="padding:15px; background:var(--green); color:white; border:none; border-radius:4px; font-weight:bold;">ΑΠΟΘΗΚΕΥΣΗ</button>
@@ -218,7 +207,6 @@ function isPentShift(s) {
     if (!s) return false;
     return (isWork(s) || s === 'ΑΔΙΑΘΕΤΟ' || s === 'ΑΔΙΑΘΕΤΟ (ΚΥ)') && s !== 'ΡΕΠΟ (10ο ΠΕΝΘ)'; 
 }
-
 function fmt(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
 
 function getHols(y) {
@@ -234,7 +222,6 @@ function checkHasPent(dStr) {
     let data = db[dStr]; if (!data) return false;
     let d = new Date(dStr); let dw = d.getDay();
     if ([data.t1, data.t2, data.t3].includes('ΡΕΠΟ (10ο ΠΕΝΘ)')) return false;
-
     if (dw === 6) return isPentShift(data.t1) || isPentShift(data.t2) || isPentShift(data.t3);
     if (dw === 0) {
         if (!(isWork(data.t1) || isWork(data.t2) || isWork(data.t3) || data.t1 === 'ΑΔΙΑΘΕΤΟ (ΚΥ)')) return false;
@@ -291,7 +278,6 @@ function calculate() {
 
         d.hasPent = checkHasPent(d.dStr);
         if (d.hasPent) mPent++;
-
         if (d.dw === 0 && (isWork(d.data.t1) || isWork(d.data.t2) || isWork(d.data.t3) || d.data.t1 === 'ΑΔΙΑΘΕΤΟ (ΚΥ)')) {
             if (!d.hasPent) { d.hasRepo = true; totalRepoFromWeekends += 8; }
         }
@@ -299,9 +285,6 @@ function calculate() {
             d.hasRepo = true; totalRepoFromWeekends += 8;
         }
     });
-
-    let pGr = mPent * 46; let pEis = pGr * 0.02; let pTax = (pGr - pEis) * 0.20; let pNet = pGr - pEis - pTax;
-    let nGr = mNight * 3.3; let nMtpy = nGr * 0.02; let nEis = nGr * 0.02; let nTax = (nGr - nMtpy - nEis) * 0.20; let nNet = nGr - nMtpy - nEis - nTax;
 
     document.getElementById('weeks-stats').innerHTML = weeksHtml;
     document.getElementById('m-target').innerText = mTarget.toFixed(1);
@@ -311,15 +294,20 @@ function calculate() {
     document.getElementById('repo-from-weekends').innerText = totalRepoFromWeekends.toFixed(1);
     document.getElementById('extra-hours').innerText = (mActualTotal - mTarget).toFixed(1);
     document.getElementById('total-month-hours').innerText = (mActualTotal - mTarget + totalRepoFromWeekends).toFixed(1);
+    
     document.getElementById('leave-normal').innerText = leaves['ΚΑΝΟΝΙΚΗ ΑΔΕΙΑ'];
     document.getElementById('leave-short').innerText = leaves['ΒΡΑΧΕΙΑ'];
     document.getElementById('leave-sick').innerText = leaves['ΑΝΑΡΡΩΤΙΚΗ'];
     document.getElementById('leave-special').innerText = leaves['ΕΙΔΙΚΗ ΑΔΕΙΑ'];
+
+    let pGr = mPent * 46, pEis = pGr * 0.02, pTax = (pGr - pEis) * 0.20, pNet = pGr - pEis - pTax;
     document.getElementById('p-count').innerText = mPent; 
     document.getElementById('p-gross').innerText = pGr.toFixed(2)+'€';
     document.getElementById('p-eis').innerText = pEis.toFixed(2)+'€';
     document.getElementById('p-tax').innerText = pTax.toFixed(2)+'€'; 
     document.getElementById('p-net').innerText = pNet.toFixed(2)+'€';
+    
+    let nGr = mNight * 3.3, nMtpy = nGr * 0.02, nEis = nGr * 0.02, nTax = (nGr - nMtpy - nEis) * 0.20, nNet = nGr - nMtpy - nEis - nTax;
     document.getElementById('night-gross').innerText = nGr.toFixed(2)+'€';
     document.getElementById('night-mtpy').innerText = nMtpy.toFixed(2)+'€';
     document.getElementById('night-eisfora').innerText = nEis.toFixed(2)+'€';
@@ -334,11 +322,10 @@ function calculate() {
         if (row.children.length === 7) { body.appendChild(row); row = document.createElement('tr'); }
         let cell = document.createElement('td'); cell.onclick = () => openModal(d.dStr);
         if (d.isH) cell.className = 'holiday-cell'; else if (d.dw === 0) cell.className = 'sun-cell'; else if (d.dw === 6) cell.className = 'sat-cell';
-        let tags = ''; 
-        [1,2,3].forEach(n => { 
+        let tags = ''; [1,2,3].forEach(n => { 
             if (d.data[`t${n}`]) {
-                let displayShift = d.data[`t${n}`].replace("[C] ", "");
-                tags += `<div class="shift-tag ${d.data[`type${n}`]==='night'?'night-tag':''} ${d.data[`type${n}`]==='leave'?'leave-tag':''}">${displayShift}</div>`; 
+                let display = d.data[`t${n}`].replace("[C] ", "");
+                tags += `<div class="shift-tag ${d.data[`type${n}`]==='night'?'night-tag':''} ${d.data[`type${n}`]==='leave'?'leave-tag':''}">${display}</div>`; 
             }
         });
         cell.innerHTML = `<div style="display:flex; justify-content:space-between"><span class="day-num">${d.date.getDate()}</span><div style="font-size:9px">${d.hasPent?'<b style="color:orange">46€</b>':''} ${d.hasRepo?'<b style="color:red">+Ρ</b>':''}</div></div>${tags}${d.data.txt?`<div class="day-note">${d.data.txt}</div>`:''}`;
@@ -351,11 +338,8 @@ function calculate() {
     let prmin = repStorage.savedTransfers[prevK] || 0;
     let paid = parseFloat(localStorage.getItem('paid_'+pk)) || 0;
     document.getElementById('paidHours').value = paid;
-    let trans = prmin + (mActualTotal - mTarget + totalRepoFromWeekends) - paid;
     document.getElementById('prminRep').innerText = prmin.toFixed(1);
-    document.getElementById('transferRep').innerText = trans.toFixed(1);
-    repStorage.savedTransfers[pk] = trans;
-    localStorage.setItem('exfroura_rep', JSON.stringify(repStorage));
+    document.getElementById('transferRep').innerText = (prmin + (mActualTotal - mTarget + totalRepoFromWeekends) - paid).toFixed(1);
 }
 
 function setActiveShift(s) { activeShift = s; document.querySelectorAll('.m-btn').forEach(b => b.classList.remove('active-shift')); document.getElementById(`shift${s}-btn`).classList.add('active-shift'); }
@@ -372,13 +356,12 @@ function openModal(d) {
         g.appendChild(b); 
     });
 
-    // CUSTOM SHIFT BUTTON
     let cb = document.createElement('div'); cb.className = 'm-btn custom-btn'; cb.innerText = 'CUSTOM +';
     cb.onclick = () => {
-        let name = prompt("Όνομα βάρδιας (π.χ. Υπηρεσία):");
+        let name = prompt("Όνομα βάρδιας:");
         if(name) {
-            let hours = prompt("Πόσες ώρες;", "8");
-            let type = confirm("Είναι νυχτερινή; (OK για ΝΑΙ / Cancel για ΟΧΙ)") ? "night" : "day";
+            let hours = prompt("Ώρες;", "8");
+            let type = confirm("Είναι νυχτερινή;") ? "night" : "day";
             document.getElementById(`c-n${activeShift}`).value = "[C] " + name;
             document.getElementById(`c-h${activeShift}`).value = parseFloat(hours);
             document.getElementById(`c-t${activeShift}`).value = type;
@@ -386,7 +369,6 @@ function openModal(d) {
         }
     };
     g.appendChild(cb);
-
     setActiveShift(1); document.getElementById('modal').style.display = 'block';
 }
 
@@ -399,6 +381,7 @@ function closeModal() { document.getElementById('modal').style.display = 'none';
 function nav(v) { cur.setMonth(cur.getMonth() + v); calculate(); }
 function saveMode() { settings.mode = document.getElementById('mode-sel').value; localStorage.setItem('exfroura_settings', JSON.stringify(settings)); calculate(); }
 function savePaidHours() { let pk = cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0'); localStorage.setItem('paid_'+pk, document.getElementById('paidHours').value); calculate(); }
+function saveRepTransfer() { let pk = cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0'); repStorage.savedTransfers[pk] = parseFloat(document.getElementById('transferRep').innerText); localStorage.setItem('exfroura_rep', JSON.stringify(repStorage)); alert("Αποθηκεύτηκε!"); }
 function exportData() { let b = new Blob([JSON.stringify({db, settings, repStorage})], {type:'application/json'}); let a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download="backup.json"; a.click(); }
 function importData(e) { let f = e.target.files[0]; let r = new FileReader(); r.onload=(x)=>{ let d = JSON.parse(x.target.result); db=d.db; settings=d.settings; repStorage=d.repStorage; localStorage.setItem('exfroura_db', JSON.stringify(db)); calculate(); }; r.readAsText(f); }
 document.addEventListener('DOMContentLoaded', () => { document.getElementById('mode-sel').value = settings.mode; calculate(); });
