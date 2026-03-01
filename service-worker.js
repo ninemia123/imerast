@@ -1,5 +1,4 @@
-const CACHE_NAME = "imerast-v1";
-// ΜΟΝΟ τα αρχεία που υπάρχουν όντως στο GitHub σου
+const CACHE_NAME = "imerast-v2"; // Αλλάζουμε το v1 σε v2 για να καταλάβει ο Chrome την αλλαγή
 const assets = [
   "./",
   "./index.html",
@@ -12,7 +11,6 @@ self.addEventListener("install", (event) => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      // Το cache.addAll θα αποτύχει αν έστω και ΕΝΑ αρχείο λείπει
       return cache.addAll(assets);
     })
   );
