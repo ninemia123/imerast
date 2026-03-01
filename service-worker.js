@@ -1,4 +1,5 @@
 const CACHE_NAME = "imerast-v1";
+// ΜΟΝΟ τα αρχεία που υπάρχουν όντως στο GitHub σου
 const assets = [
   "./",
   "./index.html",
@@ -7,18 +8,18 @@ const assets = [
   "./assets/icon-512.png"
 ];
 
-// Εγκατάσταση και άμεση ενεργοποίηση
 self.addEventListener("install", (event) => {
-  self.skipWaiting(); // Αναγκάζει τον νέο SW να ενεργοποιηθεί αμέσως
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
+      // Το cache.addAll θα αποτύχει αν έστω και ΕΝΑ αρχείο λείπει
       return cache.addAll(assets);
     })
   );
 });
 
 self.addEventListener("activate", (event) => {
-  event.waitUntil(clients.claim()); // Παίρνει τον έλεγχο της σελίδας αμέσως
+  event.waitUntil(clients.claim());
 });
 
 self.addEventListener("fetch", (event) => {
