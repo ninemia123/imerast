@@ -2,8 +2,7 @@ const CACHE_NAME = "imerast-cache-v1";
 const urlsToCache = [
   "/imerast/",
   "/imerast/index.html",
-  "/imerast/style.css",
-  "/imerast/update.js"
+  
 ];
 
 self.addEventListener("install", (event) => {
@@ -21,3 +20,4 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
+
