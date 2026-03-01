@@ -1,21 +1,21 @@
-
 {
   "name": "Imerast",
   "short_name": "Imerast",
-  "start_url": "/imerast/",
-  "scope": "/imerast/",
+  "start_url": "./index.html", 
+  "scope": "./",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
   "orientation": "portrait",
   "icons": [
     {
-      "src": "/imerast/assets/icon-192.png",
+      "src": "assets/icon-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any maskable"
     },
     {
-      "src": "/imerast/assets/icon-512.png",
+      "src": "assets/icon-512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
