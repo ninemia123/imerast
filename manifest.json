@@ -1,12 +1,10 @@
 {
   "name": "Imerast",
   "short_name": "Imerast",
-  "start_url": "./index.html", 
-  "scope": "./",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#000000",
-  "orientation": "portrait",
   "icons": [
     {
       "src": "assets/icon-192.png",
