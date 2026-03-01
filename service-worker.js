@@ -1,7 +1,5 @@
-const CACHE_NAME = "imerast-cache-v1";
-
-// Χρησιμοποιούμε σχετικές διαδρομές (./) για να παίζει σωστά στο GitHub Pages
-const urlsToCache = [
+const CACHE_NAME = "imerast-v1";
+const assets = [
   "./",
   "./index.html",
   "./manifest.json",
@@ -9,19 +7,23 @@ const urlsToCache = [
   "./assets/icon-512.png"
 ];
 
+// Εγκατάσταση και άμεση ενεργοποίηση
 self.addEventListener("install", (event) => {
+  self.skipWaiting(); // Αναγκάζει τον νέο SW να ενεργοποιηθεί αμέσως
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      // Προσθέτουμε τα αρχεία στο cache
-      return cache.addAll(urlsToCache);
+      return cache.addAll(assets);
     })
   );
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(clients.claim()); // Παίρνει τον έλεγχο της σελίδας αμέσως
 });
 
 self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.match(event.request).then((response) => {
-      // Επιστρέφει το αρχείο από το cache αν υπάρχει, αλλιώς πάει στο δίκτυο
       return response || fetch(event.request);
     })
   );
