@@ -1,4 +1,4 @@
-const CACHE_NAME = "imerast-v2"; // Αλλάζουμε το v1 σε v2 για να καταλάβει ο Chrome την αλλαγή
+const CACHE_NAME = "imerast-v3"; // Αλλάζουμε το v1 σε v2 για να καταλάβει ο Chrome την αλλαγή
 const assets = [
   "./",
   "./index.html",
@@ -27,3 +27,4 @@ self.addEventListener("fetch", (event) => {
     })
   );
 });
+
