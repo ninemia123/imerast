@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ΕΞ. ΦΡΟΥΡΑ - V5</title>
+    <title>ΕΞ. ΦΡΟΥΡΑ - V6</title>
     <style>
         :root { 
             --green: #1b5e20; --blue: #0d47a1; --red: #b71c1c; --gold: #fbc02d; 
@@ -67,13 +67,14 @@
         .total-net-box { background: var(--green); color: white; padding: 15px; text-align: center; font-size: 1.8em; font-weight: 900; border-radius: 8px; margin: 10px 0; }
         .active-shift { background: #2196f3 !important; color: white !important; }
         .custom-btn { background: #ffeb3b !important; color: #000 !important; }
+        .btn-plus { background: var(--orange); color: white; border: none; padding: 2px 8px; border-radius: 4px; font-weight: bold; cursor: pointer; margin-left: 5px; }
     </style>
 </head>
 <body>
 <div class="main-card">
     <div class="header">
         <div class="top-row">
-            <b id="app-title">ΕΞ. ΦΡΟΥΡΑ - V5</b>
+            <b id="app-title">ΕΞ. ΦΡΟΥΡΑ - V6</b>
             <div>
                 <button onclick="nav(-1)">◄</button> <span id="month-label"></span> <button onclick="nav(1)">►</button>
             </div>
@@ -108,7 +109,7 @@
             </div>
         </div>
         <div class="rep-grid">
-            <div class="rep-grid-item"><span class="rep-label-small">ΠΡ/ΜΗΝ (ώρες)</span><div id="prminRep" class="rep-display-compact">0</div></div>
+            <div class="rep-grid-item"><span class="rep-label-small">ΠΡ/ΜΗΝ (ώρες) - ΕΠΕΞΕΡΓΑΣΙΜΟ</span><input type="number" id="prminRepInput" class="rep-input-compact" onchange="manualPrevMonthChange()"></div>
             <div class="rep-grid-item"><span class="rep-label-small">ΜΕΤΑΦΟΡΑ (ώρες)</span><div id="transferRep" class="rep-display-compact" style="color:var(--orange)">0</div></div>
         </div>
         <button onclick="saveRepTransfer()" style="width:100%; padding:10px; background:var(--blue); color:white; border:none; border-radius:4px; font-weight:bold; margin-top:5px;">ΑΠΟΘΗΚΕΥΣΗ ΡΕΠΟ</button>
@@ -125,7 +126,11 @@
 
     <div class="penthemera-box">
         <div class="penthemera-grid">
-            <div class="penthemera-item"><div style="font-size: 11px; font-weight: bold;">Πενθήμερα</div><div id="p-count" style="font-size: 16px; font-weight: 900;">0</div></div>
+            <div class="penthemera-item">
+                <div style="font-size: 11px; font-weight: bold;">Πενθήμερα <button class="btn-plus" onclick="addExtraPent()">+</button></div>
+                <div id="p-count" style="font-size: 16px; font-weight: 900;">0</div>
+                <div id="p-extra-label" style="font-size: 9px; color: var(--orange);"></div>
+            </div>
             <div class="penthemera-item"><div style="font-size: 11px; font-weight: bold;">Μεικτό (46€)</div><div id="p-gross" style="font-size: 16px; font-weight: 900;">0.00€</div></div>
             <div class="penthemera-item"><div style="font-size: 11px; font-weight: bold;">Εισφορά 2%</div><div id="p-eis" style="font-size: 14px; color: var(--red);">0.00€</div></div>
             <div class="penthemera-item"><div style="font-size: 11px; font-weight: bold;">Φόρος 20%</div><div id="p-tax" style="font-size: 14px; color: var(--red);">0.00€</div></div>
@@ -136,7 +141,8 @@
     <div class="repo-transfer-box">
         <div class="repo-transfer-row"><span>Ρεπό ΣΚ/Αργίες:</span><span id="repo-from-weekends">0</span></div>
         <div class="repo-transfer-row"><span>+/- Ώρες:</span><span id="extra-hours">0.0</span></div>
-        <div class="repo-transfer-row"><span>ΣΥΝΟΛΟ ΩΡΩΝ ΜΗΝΑ:</span><span id="total-month-hours">0.0</span></div>
+        <div class="repo-transfer-row" id="extra-pent-deduction-row" style="color:var(--red); display:none;"><span>Αφαίρεση (Έξτρα Πενθ.):</span><span id="extra-pent-deduction">-0.0</span></div>
+        <div class="repo-transfer-row"><span>ΣΥΝΟΛΟ ΩΡΩΝ ΜΗΝΑ:</span><span id="total-month-hours" style="font-size:18px">0.0</span></div>
     </div>
 
     <table id="cal-table">
@@ -188,6 +194,7 @@ let cur = new Date();
 let db = JSON.parse(localStorage.getItem('exfroura_db') || '{}');
 let settings = JSON.parse(localStorage.getItem('exfroura_settings') || '{"mode":"32"}');
 let repStorage = JSON.parse(localStorage.getItem('exfroura_rep') || '{"savedTransfers": {}}');
+let extraPents = JSON.parse(localStorage.getItem('exfroura_extra_pents') || '{}');
 let selD = '', activeShift = 1;
 
 const SHIFTS = [
@@ -233,6 +240,7 @@ function checkHasPent(dStr) {
 
 function calculate() {
     const y = cur.getFullYear(), m = cur.getMonth(), hols = getHols(y);
+    const pk = y + '-' + String(m+1).padStart(2,'0');
     document.getElementById('month-label').innerText = new Intl.DateTimeFormat('el-GR', {month:'short', year:'numeric'}).format(cur).toUpperCase();
     
     let days = new Date(y, m + 1, 0).getDate();
@@ -254,7 +262,6 @@ function calculate() {
 
     allDays.forEach((d, idx) => {
         let hasLeave = [d.data.t1, d.data.t2, d.data.t3].some(l => leaves.hasOwnProperty(l));
-        // Η ΑΛΛΑΓΗ ΕΔΩ: Η αργία δεν μηδενίζει πλέον τον στόχο
         let dayTarget = (d.dw >= 1 && d.dw <= 5 && !hasLeave) ? dailyRate : 0;
         let dayActual = 0;
 
@@ -278,30 +285,63 @@ function calculate() {
 
         d.hasPent = checkHasPent(d.dStr);
         if (d.hasPent) mPent++;
-        if (d.dw === 0 && (isWork(d.data.t1) || isWork(d.data.t2) || isWork(d.data.t3) || d.data.t1 === 'ΑΔΙΑΘΕΤΟ (ΚΥ)')) {
+        
+        // ΑΛΛΑΓΗ: Το ΑΔΙΑΘΕΤΟ (ΚΥ) δίνει ρεπό
+        let isActiveOnRepoDay = (isWork(d.data.t1) || isWork(d.data.t2) || isWork(d.data.t3) || d.data.t1 === 'ΑΔΙΑΘΕΤΟ (ΚΥ)');
+        
+        if (d.dw === 0 && isActiveOnRepoDay) {
             if (!d.hasPent) { d.hasRepo = true; totalRepoFromWeekends += 8; }
         }
-        if (d.isH && d.dw >= 1 && d.dw <= 5 && (isWork(d.data.t1) || isWork(d.data.t2) || isWork(d.data.t3))) {
+        if (d.isH && d.dw >= 1 && d.dw <= 5 && isActiveOnRepoDay) {
             d.hasRepo = true; totalRepoFromWeekends += 8;
         }
     });
 
+    // Έξτρα Πενθήμερα & Αφαίρεση ρεπό
+    let currentExtra = extraPents[pk] || 0;
+    let totalPent = mPent + currentExtra;
+    let extraPentDeduction = currentExtra * 8;
+    
     document.getElementById('weeks-stats').innerHTML = weeksHtml;
     document.getElementById('m-target').innerText = mTarget.toFixed(1);
-    document.getElementById('m-penthemera').innerText = mPent;
+    document.getElementById('m-penthemera').innerText = totalPent;
+    document.getElementById('p-extra-label').innerText = currentExtra > 0 ? `(+${currentExtra} έξτρα)` : "";
     document.getElementById('m-night').innerText = mNight.toFixed(1);
     document.getElementById('m-repo').innerText = (totalRepoFromWeekends/8).toFixed(0);
     document.getElementById('repo-from-weekends').innerText = totalRepoFromWeekends.toFixed(1);
     document.getElementById('extra-hours').innerText = (mActualTotal - mTarget).toFixed(1);
-    document.getElementById('total-month-hours').innerText = (mActualTotal - mTarget + totalRepoFromWeekends).toFixed(1);
     
+    if (extraPentDeduction > 0) {
+        document.getElementById('extra-pent-deduction-row').style.display = 'flex';
+        document.getElementById('extra-pent-deduction').innerText = "-" + extraPentDeduction.toFixed(1);
+    } else {
+        document.getElementById('extra-pent-deduction-row').style.display = 'none';
+    }
+
+    // ΠΡΟΗΓΟΥΜΕΝΟΣ ΜΗΝΑΣ ΧΕΙΡΟΚΙΝΗΤΑ
+    let prev = new Date(y, m-1, 1), prevK = prev.getFullYear() + '-' + String(prev.getMonth()+1).padStart(2,'0');
+    if (!localStorage.getItem('manual_prmin_'+pk)) {
+        let autoPrev = repStorage.savedTransfers[prevK] || 0;
+        document.getElementById('prminRepInput').value = autoPrev.toFixed(1);
+    } else {
+        document.getElementById('prminRepInput').value = localStorage.getItem('manual_prmin_'+pk);
+    }
+    
+    let currentPrmin = parseFloat(document.getElementById('prminRepInput').value) || 0;
+    let paid = parseFloat(localStorage.getItem('paid_'+pk)) || 0;
+    document.getElementById('paidHours').value = paid;
+
+    let totalMonthRes = (mActualTotal - mTarget + totalRepoFromWeekends - extraPentDeduction);
+    document.getElementById('total-month-hours').innerText = totalMonthRes.toFixed(1);
+    document.getElementById('transferRep').innerText = (currentPrmin + totalMonthRes - paid).toFixed(1);
+
     document.getElementById('leave-normal').innerText = leaves['ΚΑΝΟΝΙΚΗ ΑΔΕΙΑ'];
     document.getElementById('leave-short').innerText = leaves['ΒΡΑΧΕΙΑ'];
     document.getElementById('leave-sick').innerText = leaves['ΑΝΑΡΡΩΤΙΚΗ'];
     document.getElementById('leave-special').innerText = leaves['ΕΙΔΙΚΗ ΑΔΕΙΑ'];
 
-    let pGr = mPent * 46, pEis = pGr * 0.02, pTax = (pGr - pEis) * 0.20, pNet = pGr - pEis - pTax;
-    document.getElementById('p-count').innerText = mPent; 
+    let pGr = totalPent * 46, pEis = pGr * 0.02, pTax = (pGr - pEis) * 0.20, pNet = pGr - pEis - pTax;
+    document.getElementById('p-count').innerText = totalPent; 
     document.getElementById('p-gross').innerText = pGr.toFixed(2)+'€';
     document.getElementById('p-eis').innerText = pEis.toFixed(2)+'€';
     document.getElementById('p-tax').innerText = pTax.toFixed(2)+'€'; 
@@ -332,14 +372,22 @@ function calculate() {
         row.appendChild(cell);
     });
     body.appendChild(row);
+}
 
-    let pk = y + '-' + String(m+1).padStart(2,'0');
-    let prev = new Date(y, m-1, 1), prevK = prev.getFullYear() + '-' + String(prev.getMonth()+1).padStart(2,'0');
-    let prmin = repStorage.savedTransfers[prevK] || 0;
-    let paid = parseFloat(localStorage.getItem('paid_'+pk)) || 0;
-    document.getElementById('paidHours').value = paid;
-    document.getElementById('prminRep').innerText = prmin.toFixed(1);
-    document.getElementById('transferRep').innerText = (prmin + (mActualTotal - mTarget + totalRepoFromWeekends) - paid).toFixed(1);
+function manualPrevMonthChange() {
+    const pk = cur.getFullYear() + '-' + String(cur.getMonth()+1).padStart(2,'0');
+    localStorage.setItem('manual_prmin_'+pk, document.getElementById('prminRepInput').value);
+    calculate();
+}
+
+function addExtraPent() {
+    const pk = cur.getFullYear() + '-' + String(cur.getMonth()+1).padStart(2,'0');
+    let val = prompt("Πόσα ΕΠΙΠΛΕΟΝ πενθήμερα θέλετε να προσθέσετε; (Θα αφαιρεθεί 1 ρεπό/8 ώρες για το καθένα)", extraPents[pk] || 0);
+    if (val !== null) {
+        extraPents[pk] = parseInt(val) || 0;
+        localStorage.setItem('exfroura_extra_pents', JSON.stringify(extraPents));
+        calculate();
+    }
 }
 
 function setActiveShift(s) { activeShift = s; document.querySelectorAll('.m-btn').forEach(b => b.classList.remove('active-shift')); document.getElementById(`shift${s}-btn`).classList.add('active-shift'); }
@@ -382,24 +430,9 @@ function nav(v) { cur.setMonth(cur.getMonth() + v); calculate(); }
 function saveMode() { settings.mode = document.getElementById('mode-sel').value; localStorage.setItem('exfroura_settings', JSON.stringify(settings)); calculate(); }
 function savePaidHours() { let pk = cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0'); localStorage.setItem('paid_'+pk, document.getElementById('paidHours').value); calculate(); }
 function saveRepTransfer() { let pk = cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0'); repStorage.savedTransfers[pk] = parseFloat(document.getElementById('transferRep').innerText); localStorage.setItem('exfroura_rep', JSON.stringify(repStorage)); alert("Αποθηκεύτηκε!"); }
-function exportData() { let b = new Blob([JSON.stringify({db, settings, repStorage})], {type:'application/json'}); let a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download="backup.json"; a.click(); }
-function importData(e) { let f = e.target.files[0]; let r = new FileReader(); r.onload=(x)=>{ let d = JSON.parse(x.target.result); db=d.db; settings=d.settings; repStorage=d.repStorage; localStorage.setItem('exfroura_db', JSON.stringify(db)); calculate(); }; r.readAsText(f); }
+function exportData() { let b = new Blob([JSON.stringify({db, settings, repStorage, extraPents})], {type:'application/json'}); let a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download="backup_v6.json"; a.click(); }
+function importData(e) { let f = e.target.files[0]; let r = new FileReader(); r.onload=(x)=>{ let d = JSON.parse(x.target.result); db=d.db; settings=d.settings; repStorage=d.repStorage; extraPents=d.extraPents||{}; localStorage.setItem('exfroura_db', JSON.stringify(db)); calculate(); }; r.readAsText(f); }
 
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js').then(reg => {
-            reg.onupdatefound = () => {
-                const installingWorker = reg.installing;
-                installingWorker.onstatechange = () => {
-                    if (installingWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                        caches.keys().then(names => { for (let name of names) caches.delete(name); });
-                        setTimeout(() => { window.location.reload(); }, 500);
-                    }
-                };
-            };
-        });
-    });
-}
 document.addEventListener('DOMContentLoaded', () => { document.getElementById('mode-sel').value = settings.mode; calculate(); });
 </script>
 </body>
