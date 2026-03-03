@@ -8,7 +8,6 @@
     <meta name="theme-color" content="#000000">
     
     <style>
-        /* --- Όλος ο CSS από το αρχικό σου HTML --- */
         :root { 
             --green: #1b5e20; --blue: #0d47a1; --red: #b71c1c; --gold: #fbc02d; 
             --sat-bg: #e3f2fd; --sun-bg: #ffebee; --hol-bg: #ffcdd2; 
@@ -199,7 +198,7 @@ let selD = '', activeShift = 1;
 
 const SHIFTS = [
     {n:'ΠΡΩΙ', h:8, t:'day'}, {n:'ΑΠΟΓΕΥΜΑ', h:8, t:'day'}, {n:'ΝΥΧΤΑ', h:8, t:'night'},
-    {n:'ΡΕΠΟ (10ο ΠΕΝΘ)', h:8, t:'repo10'}, // ΝΕΑ ΕΠΙΛΟΓΗ
+    {n:'ΡΕΠΟ (10ο ΠΕΝΘ)', h:8, t:'repo10'},
     {n:'ΑΔΙΑΘΕΤΟ', h:0, t:'pent'}, {n:'ΑΔΙΑΘΕΤΟ (ΚΥ)', h:0, t:'pent'}, {n:'ΡΕΠΟ', h:0, t:'rest'},
     {n:'ΚΑΝΟΝΙΚΗ ΑΔΕΙΑ', h:0, t:'leave'}, {n:'ΒΡΑΧΕΙΑ', h:0, t:'leave'}, 
     {n:'ΑΝΑΡΡΩΤΙΚΗ', h:0, t:'leave'}, {n:'ΕΙΔΙΚΗ ΑΔΕΙΑ', h:0, t:'leave'}
@@ -222,9 +221,7 @@ function getHols(y) {
 function checkHasPent(dStr) {
     let data = db[dStr]; if (!data) return false;
     let d = new Date(dStr); let dw = d.getDay();
-    // Αν έχει επιλεγεί ΡΕΠΟ (10ο ΠΕΝΘ) σε οποιαδήποτε βάρδια, ΔΕΝ μετράει ως πενθήμερο πληρωμής
     if ([data.t1, data.t2, data.t3].includes('ΡΕΠΟ (10ο ΠΕΝΘ)')) return false;
-
     if (dw === 6) return isPentShift(data.t1) || isPentShift(data.t2) || isPentShift(data.t3);
     if (dw === 0) {
         if (!(isWork(data.t1) || isWork(data.t2) || isWork(data.t3) || data.t1 === 'ΑΔΙΑΘΕΤΟ (ΚΥ)')) return false;
@@ -258,7 +255,11 @@ function calculate() {
 
     allDays.forEach((d, idx) => {
         let hasLeave = [d.data.t1, d.data.t2, d.data.t3].some(l => leaves.hasOwnProperty(l));
-        let dayTarget = (d.dw >= 1 && d.dw <= 5 && !d.isH && !hasLeave) ? dailyRate : 0;
+        
+        // Ο ΚΑΝΟΝΑΣ ΑΛΛΑΞΕ ΕΔΩ: 
+        // Ο στόχος ημέρας υπολογίζεται για όλες τις καθημερινές (1-5) ανεξάρτητα αν είναι αργία (isH)
+        let dayTarget = (d.dw >= 1 && d.dw <= 5 && !hasLeave) ? dailyRate : 0;
+        
         let dayActual = 0;
 
         [1,2,3].forEach(n => {
@@ -282,7 +283,6 @@ function calculate() {
         d.hasPent = checkHasPent(d.dStr);
         if (d.hasPent) mPent++;
 
-        // Λογική Ρεπό από ΣΚ ή 10ο Πενθήμερο
         if (d.dw === 0 && (isWork(d.data.t1) || isWork(d.data.t2) || isWork(d.data.t3) || d.data.t1 === 'ΑΔΙΑΘΕΤΟ (ΚΥ)')) {
             if (!d.hasPent) { d.hasRepo = true; totalRepoFromWeekends += 8; }
         }
@@ -291,7 +291,6 @@ function calculate() {
         }
     });
 
-    // UI Updates... (Υπόλοιπος κώδικας ίδιος)
     let pGr = mPent * 46; let pEis = pGr * 0.02; let pTax = (pGr - pEis) * 0.20; let pNet = pGr - pEis - pTax;
     let nGr = mNight * 3.3; let nMtpy = nGr * 0.02; let nEis = nGr * 0.02; let nTax = (nGr - nMtpy - nEis) * 0.20; let nNet = nGr - nMtpy - nEis - nTax;
 
@@ -367,14 +366,4 @@ function importData(e) { let f = e.target.files[0]; let r = new FileReader(); r.
 document.addEventListener('DOMContentLoaded', () => { document.getElementById('mode-sel').value = settings.mode; calculate(); });
 </script>
 </body>
-
-<script>
-if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('service-worker.js')
-        .then(reg => console.log('ServiceWorker registered: ', reg))
-        .catch(err => console.log('ServiceWorker registration failed: ', err));
-    });
-}
-</script>
 </html>
