@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ΕΞ. ΦΡΟΥΡΑ - V6</title>
+    <title>ΕΞ. ΦΡΟΥΡΑ - V6.1</title>
     <style>
         :root { 
             --green: #1b5e20; --blue: #0d47a1; --red: #b71c1c; --gold: #fbc02d; 
@@ -14,7 +14,7 @@
         .main-card { max-width: 1100px; margin: auto; background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .header { background: var(--green); color: white; padding: 10px; }
         .top-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .header select { font-weight: bold; border-radius: 4px; border: none; padding: 10px; width: 100%; font-size: 14px; margin-top: 4px; }
+        .header select { font-weight: bold; border-radius: 4px; border: none; padding: 10px; width: 100%; font-size: 14px; margin-top: 4px; background: white; color: black; }
         
         .month-totals { display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px; padding: 10px; background: #e8f5e9; border-bottom: 2px solid var(--green); }
         .total-box { background: white; padding: 8px 2px; border-radius: 5px; text-align: center; border: 1px solid #c8e6c9; }
@@ -74,15 +74,16 @@
 <div class="main-card">
     <div class="header">
         <div class="top-row">
-            <b id="app-title">ΕΞ. ΦΡΟΥΡΑ - V6</b>
+            <b id="app-title">ΕΞ. ΦΡΟΥΡΑ - V6.1</b>
             <div>
                 <button onclick="nav(-1)">◄</button> <span id="month-label"></span> <button onclick="nav(1)">►</button>
             </div>
         </div>
+        <div style="font-size: 10px; margin-bottom: 2px;">ΕΒΔΟΜΑΔΙΑΙΟ ΩΡΑΡΙΟ:</div>
         <select id="mode-sel" onchange="saveMode()">
-            <option value="32">32 ώρες</option>
-            <option value="27">27 ώρες (-5)</option>
-            <option value="22">22 ώρες (-10)</option>
+            <option value="32">32 ώρες (Εξ. Φρουρά)</option>
+            <option value="34">34 ώρες</option>
+            <option value="40">40 ώρες (Πλήρες)</option>
         </select>
     </div>
     
@@ -99,8 +100,8 @@
                 <span class="rep-label-small">ΜΕΙΩΜΕΝΟ</span>
                 <select id="reduced-select" class="rep-input-compact" onchange="calculate()">
                     <option value="normal">Κανονικό</option>
-                    <option value="minus1">-1 ώρα</option>
-                    <option value="minus2">-2 ώρες</option>
+                    <option value="minus1">-1 ώρα (-5 εβδ.)</option>
+                    <option value="minus2">-2 ώρες (-10 εβδ.)</option>
                 </select>
             </div>
             <div>
@@ -109,7 +110,7 @@
             </div>
         </div>
         <div class="rep-grid">
-            <div class="rep-grid-item"><span class="rep-label-small">ΠΡ/ΜΗΝ (ώρες) - ΕΠΕΞΕΡΓΑΣΙΜΟ</span><input type="number" id="prminRepInput" class="rep-input-compact" onchange="manualPrevMonthChange()"></div>
+            <div class="rep-grid-item"><span class="rep-label-small">ΠΡ/ΜΗΝ (ώρες)</span><input type="number" id="prminRepInput" class="rep-input-compact" onchange="manualPrevMonthChange()"></div>
             <div class="rep-grid-item"><span class="rep-label-small">ΜΕΤΑΦΟΡΑ (ώρες)</span><div id="transferRep" class="rep-display-compact" style="color:var(--orange)">0</div></div>
         </div>
         <button onclick="saveRepTransfer()" style="width:100%; padding:10px; background:var(--blue); color:white; border:none; border-radius:4px; font-weight:bold; margin-top:5px;">ΑΠΟΘΗΚΕΥΣΗ ΡΕΠΟ</button>
@@ -253,9 +254,13 @@ function calculate() {
 
     let mTarget = 0, mNight = 0, mPent = 0, mActualTotal = 0, totalRepoFromWeekends = 0;
     let leaves = {'ΚΑΝΟΝΙΚΗ ΑΔΕΙΑ':0, 'ΒΡΑΧΕΙΑ':0, 'ΑΝΑΡΡΩΤΙΚΗ':0, 'ΕΙΔΙΚΗ ΑΔΕΙΑ':0};
+    
+    // Δυναμικός υπολογισμός βάσει επιλογής ωραρίου
     let baseWeekly = parseInt(settings.mode);
     let reduced = document.getElementById('reduced-select').value;
-    if(reduced==='minus1') baseWeekly -= 5; else if(reduced==='minus2') baseWeekly -= 10;
+    if(reduced==='minus1') baseWeekly -= 5; 
+    else if(reduced==='minus2') baseWeekly -= 10;
+    
     const dailyRate = baseWeekly / 5;
 
     let weeksHtml = '', currentWeekTarget = 0, currentWeekActual = 0, weekCount = 1;
@@ -286,7 +291,6 @@ function calculate() {
         d.hasPent = checkHasPent(d.dStr);
         if (d.hasPent) mPent++;
         
-        // ΑΛΛΑΓΗ: Το ΑΔΙΑΘΕΤΟ (ΚΥ) δίνει ρεπό
         let isActiveOnRepoDay = (isWork(d.data.t1) || isWork(d.data.t2) || isWork(d.data.t3) || d.data.t1 === 'ΑΔΙΑΘΕΤΟ (ΚΥ)');
         
         if (d.dw === 0 && isActiveOnRepoDay) {
@@ -297,7 +301,6 @@ function calculate() {
         }
     });
 
-    // Έξτρα Πενθήμερα & Αφαίρεση ρεπό
     let currentExtra = extraPents[pk] || 0;
     let totalPent = mPent + currentExtra;
     let extraPentDeduction = currentExtra * 8;
@@ -318,7 +321,6 @@ function calculate() {
         document.getElementById('extra-pent-deduction-row').style.display = 'none';
     }
 
-    // ΠΡΟΗΓΟΥΜΕΝΟΣ ΜΗΝΑΣ ΧΕΙΡΟΚΙΝΗΤΑ
     let prev = new Date(y, m-1, 1), prevK = prev.getFullYear() + '-' + String(prev.getMonth()+1).padStart(2,'0');
     if (!localStorage.getItem('manual_prmin_'+pk)) {
         let autoPrev = repStorage.savedTransfers[prevK] || 0;
@@ -382,7 +384,7 @@ function manualPrevMonthChange() {
 
 function addExtraPent() {
     const pk = cur.getFullYear() + '-' + String(cur.getMonth()+1).padStart(2,'0');
-    let val = prompt("Πόσα ΕΠΙΠΛΕΟΝ πενθήμερα θέλετε να προσθέσετε; (Θα αφαιρεθεί 1 ρεπό/8 ώρες για το καθένα)", extraPents[pk] || 0);
+    let val = prompt("Πόσα ΕΠΙΠΛΕΟΝ πενθήμερα θέλετε να προσθέσετε;", extraPents[pk] || 0);
     if (val !== null) {
         extraPents[pk] = parseInt(val) || 0;
         localStorage.setItem('exfroura_extra_pents', JSON.stringify(extraPents));
@@ -430,7 +432,7 @@ function nav(v) { cur.setMonth(cur.getMonth() + v); calculate(); }
 function saveMode() { settings.mode = document.getElementById('mode-sel').value; localStorage.setItem('exfroura_settings', JSON.stringify(settings)); calculate(); }
 function savePaidHours() { let pk = cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0'); localStorage.setItem('paid_'+pk, document.getElementById('paidHours').value); calculate(); }
 function saveRepTransfer() { let pk = cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0'); repStorage.savedTransfers[pk] = parseFloat(document.getElementById('transferRep').innerText); localStorage.setItem('exfroura_rep', JSON.stringify(repStorage)); alert("Αποθηκεύτηκε!"); }
-function exportData() { let b = new Blob([JSON.stringify({db, settings, repStorage, extraPents})], {type:'application/json'}); let a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download="backup_v6.json"; a.click(); }
+function exportData() { let b = new Blob([JSON.stringify({db, settings, repStorage, extraPents})], {type:'application/json'}); let a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download="backup_v6_1.json"; a.click(); }
 function importData(e) { let f = e.target.files[0]; let r = new FileReader(); r.onload=(x)=>{ let d = JSON.parse(x.target.result); db=d.db; settings=d.settings; repStorage=d.repStorage; extraPents=d.extraPents||{}; localStorage.setItem('exfroura_db', JSON.stringify(db)); calculate(); }; r.readAsText(f); }
 
 document.addEventListener('DOMContentLoaded', () => { document.getElementById('mode-sel').value = settings.mode; calculate(); });
