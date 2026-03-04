@@ -3,12 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ΕΞ. ΦΡΟΥΡΑ - V6.1</title>
+    <title>ΕΞ. ΦΡΟΥΡΑ - V6.2</title>
     <style>
         :root { 
             --green: #1b5e20; --blue: #0d47a1; --red: #b71c1c; --gold: #fbc02d; 
             --sat-bg: #e3f2fd; --sun-bg: #ffebee; --hol-bg: #ffcdd2; 
             --purple: #7b1fa2; --orange: #ff9800;
+            /* Νέα χρώματα βαρδιών */
+            --cls-morning: #2e7d32;
+            --cls-afternoon: #ef6c00;
+            --cls-night: #4527a0;
+            --cls-repo10: #c62828;
+            --cls-leave: #ad1457;
+            --cls-rest: #616161;
         }
         body { font-family: Arial, sans-serif; margin: 0; padding: 5px; background: #f0f0f0; user-select: none; }
         .main-card { max-width: 1100px; margin: auto; background: white; border-radius: 8px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
@@ -50,9 +57,17 @@
         .sun-cell { background: var(--sun-bg) !important; }
         .holiday-cell { background: var(--hol-bg) !important; border: 2.5px solid var(--red) !important; }
         .day-num { font-weight: 900; font-size: 16px; display: block; }
-        .shift-tag { background: var(--blue); color: white; font-size: 9px; padding: 2px; border-radius: 3px; display: block; margin-top: 2px; text-align: center; font-weight: bold; }
-        .night-tag { background: var(--purple); }
-        .leave-tag { background: #9c27b0; }
+        
+        /* Στυλ για τα χρωματιστά Tags */
+        .shift-tag { color: white; font-size: 9px; padding: 2px; border-radius: 3px; display: block; margin-top: 2px; text-align: center; font-weight: bold; text-shadow: 0px 1px 1px rgba(0,0,0,0.3); }
+        .tag-morning { background: var(--cls-morning); }
+        .tag-afternoon { background: var(--cls-afternoon); }
+        .tag-night { background: var(--cls-night); }
+        .tag-repo10 { background: var(--cls-repo10); }
+        .tag-leave { background: var(--cls-leave); }
+        .tag-rest { background: var(--cls-rest); }
+        .tag-custom { background: var(--blue); }
+
         .day-note { font-size: 11px; color: #000; font-weight: 900; display: block; margin-top: 4px; border-top: 1px solid #eee; }
 
         .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); }
@@ -74,7 +89,7 @@
 <div class="main-card">
     <div class="header">
         <div class="top-row">
-            <b id="app-title">ΕΞ. ΦΡΟΥΡΑ - V6.1</b>
+            <b id="app-title">ΕΞ. ΦΡΟΥΡΑ - V6.2</b>
             <div>
                 <button onclick="nav(-1)">◄</button> <span id="month-label"></span> <button onclick="nav(1)">►</button>
             </div>
@@ -199,9 +214,9 @@ let extraPents = JSON.parse(localStorage.getItem('exfroura_extra_pents') || '{}'
 let selD = '', activeShift = 1;
 
 const SHIFTS = [
-    {n:'ΠΡΩΙ', h:8, t:'day'}, {n:'ΑΠΟΓΕΥΜΑ', h:8, t:'day'}, {n:'ΝΥΧΤΑ (3.3€)', h:8, t:'night'},
+    {n:'ΠΡΩΙ', h:8, t:'morning'}, {n:'ΑΠΟΓΕΥΜΑ', h:8, t:'afternoon'}, {n:'ΝΥΧΤΑ (3.3€)', h:8, t:'night'},
     {n:'ΡΕΠΟ (10ο ΠΕΝΘ)', h:8, t:'repo10'},
-    {n:'ΑΔΙΑΘΕΤΟ', h:0, t:'pent'}, {n:'ΑΔΙΑΘΕΤΟ (ΚΥ)', h:0, t:'pent'}, {n:'ΡΕΠΟ', h:0, t:'rest'},
+    {n:'ΑΔΙΑΘΕΤΟ', h:0, t:'rest'}, {n:'ΑΔΙΑΘΕΤΟ (ΚΥ)', h:0, t:'rest'}, {n:'ΡΕΠΟ', h:0, t:'rest'},
     {n:'ΚΑΝΟΝΙΚΗ ΑΔΕΙΑ', h:0, t:'leave'}, {n:'ΒΡΑΧΕΙΑ', h:0, t:'leave'}, 
     {n:'ΑΝΑΡΡΩΤΙΚΗ', h:0, t:'leave'}, {n:'ΕΙΔΙΚΗ ΑΔΕΙΑ', h:0, t:'leave'}
 ];
@@ -214,6 +229,19 @@ function isPentShift(s) {
     if (!s) return false;
     return (isWork(s) || s === 'ΑΔΙΑΘΕΤΟ' || s === 'ΑΔΙΑΘΕΤΟ (ΚΥ)') && s !== 'ΡΕΠΟ (10ο ΠΕΝΘ)'; 
 }
+
+// Συνάρτηση για την ανάθεση CSS class βάσει τύπου βάρδιας
+function getTagClass(type, name) {
+    if (name && name.startsWith("[C]")) return "tag-custom";
+    if (type === 'morning') return "tag-morning";
+    if (type === 'afternoon') return "tag-afternoon";
+    if (type === 'night') return "tag-night";
+    if (type === 'repo10') return "tag-repo10";
+    if (type === 'leave') return "tag-leave";
+    if (type === 'rest') return "tag-rest";
+    return "tag-custom";
+}
+
 function fmt(d) { return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`; }
 
 function getHols(y) {
@@ -255,7 +283,6 @@ function calculate() {
     let mTarget = 0, mNight = 0, mPent = 0, mActualTotal = 0, totalRepoFromWeekends = 0;
     let leaves = {'ΚΑΝΟΝΙΚΗ ΑΔΕΙΑ':0, 'ΒΡΑΧΕΙΑ':0, 'ΑΝΑΡΡΩΤΙΚΗ':0, 'ΕΙΔΙΚΗ ΑΔΕΙΑ':0};
     
-    // Δυναμικός υπολογισμός βάσει επιλογής ωραρίου
     let baseWeekly = parseInt(settings.mode);
     let reduced = document.getElementById('reduced-select').value;
     if(reduced==='minus1') baseWeekly -= 5; 
@@ -266,8 +293,8 @@ function calculate() {
     let weeksHtml = '', currentWeekTarget = 0, currentWeekActual = 0, weekCount = 1;
 
     allDays.forEach((d, idx) => {
-        let hasLeave = [d.data.t1, d.data.t2, d.data.t3].some(l => leaves.hasOwnProperty(l));
-        let dayTarget = (d.dw >= 1 && d.dw <= 5 && !hasLeave) ? dailyRate : 0;
+        let isLeaveDay = [d.data.t1, d.data.t2, d.data.t3].some(l => leaves.hasOwnProperty(l));
+        let dayTarget = (d.dw >= 1 && d.dw <= 5 && !isLeaveDay) ? dailyRate : 0;
         let dayActual = 0;
 
         [1,2,3].forEach(n => {
@@ -367,7 +394,8 @@ function calculate() {
         let tags = ''; [1,2,3].forEach(n => { 
             if (d.data[`t${n}`]) {
                 let display = d.data[`t${n}`].replace("[C] ", "");
-                tags += `<div class="shift-tag ${d.data[`type${n}`]==='night'?'night-tag':''} ${d.data[`type${n}`]==='leave'?'leave-tag':''}">${display}</div>`; 
+                let cls = getTagClass(d.data[`type${n}`], d.data[`t${n}`]);
+                tags += `<div class="shift-tag ${cls}">${display}</div>`; 
             }
         });
         cell.innerHTML = `<div style="display:flex; justify-content:space-between"><span class="day-num">${d.date.getDate()}</span><div style="font-size:9px">${d.hasPent?'<b style="color:orange">46€</b>':''} ${d.hasRepo?'<b style="color:red">+Ρ</b>':''}</div></div>${tags}${d.data.txt?`<div class="day-note">${d.data.txt}</div>`:''}`;
@@ -432,7 +460,7 @@ function nav(v) { cur.setMonth(cur.getMonth() + v); calculate(); }
 function saveMode() { settings.mode = document.getElementById('mode-sel').value; localStorage.setItem('exfroura_settings', JSON.stringify(settings)); calculate(); }
 function savePaidHours() { let pk = cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0'); localStorage.setItem('paid_'+pk, document.getElementById('paidHours').value); calculate(); }
 function saveRepTransfer() { let pk = cur.getFullYear()+'-'+String(cur.getMonth()+1).padStart(2,'0'); repStorage.savedTransfers[pk] = parseFloat(document.getElementById('transferRep').innerText); localStorage.setItem('exfroura_rep', JSON.stringify(repStorage)); alert("Αποθηκεύτηκε!"); }
-function exportData() { let b = new Blob([JSON.stringify({db, settings, repStorage, extraPents})], {type:'application/json'}); let a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download="backup_v6_1.json"; a.click(); }
+function exportData() { let b = new Blob([JSON.stringify({db, settings, repStorage, extraPents})], {type:'application/json'}); let a = document.createElement('a'); a.href = URL.createObjectURL(b); a.download="backup_v6_2.json"; a.click(); }
 function importData(e) { let f = e.target.files[0]; let r = new FileReader(); r.onload=(x)=>{ let d = JSON.parse(x.target.result); db=d.db; settings=d.settings; repStorage=d.repStorage; extraPents=d.extraPents||{}; localStorage.setItem('exfroura_db', JSON.stringify(db)); calculate(); }; r.readAsText(f); }
 
 document.addEventListener('DOMContentLoaded', () => { document.getElementById('mode-sel').value = settings.mode; calculate(); });
